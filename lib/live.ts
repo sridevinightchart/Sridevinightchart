@@ -6,6 +6,7 @@ export interface LivePayload {
   version?: string | null;
   date: string; // today (IST)
   today: Result | null;
+  latest?: Result | null; // Latest completed result, never later than today's IST date.
   yesterday: Result | null;
   week: { date: string; result: Result | null }[]; // Mon → Sun of the current week
 }
@@ -20,6 +21,7 @@ export function buildLive(now: Date = new Date()): LivePayload {
     version: repo.lastUpdated(),
     date,
     today: by.get(date) ?? null,
+    latest: repo.getAll().reverse().find((r) => r.date <= date && r.status === 'closed' && /^\d{2}$/.test(r.jodi ?? '')) ?? null,
     yesterday: repo.getByDate(addDays(date, -1)),
     week: Array.from({ length: 7 }, (_, i) => {
       const d = addDays(monday, i);

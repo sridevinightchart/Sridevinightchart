@@ -77,8 +77,10 @@ export default function ResultCard({
     };
   }, [initial.date, refresh]);
 
-  const d = display(data.today);
   const declared = data.today?.status === 'closed' || data.today?.status === 'open';
+  const shown = declared ? data.today : (data.latest ?? (data.yesterday?.status === 'closed' ? data.yesterday : null));
+  const previous = !!shown && shown.date !== data.date;
+  const d = display(shown);
   const y = display(data.yesterday);
   const status = statusOf(data, nowMin);
 
@@ -107,8 +109,8 @@ export default function ResultCard({
         >
           {/* Top: label + date */}
           <div className="flex items-center justify-between gap-3 text-[13px] font-semibold tracking-wide">
-            <span>{declared ? 'Last result' : title}</span>
-            <span className="num">{labelShort(data.date)}</span>
+            <span>{previous ? 'Last declared result' : declared ? 'Latest result' : title}</span>
+            <span className="num">{labelShort(shown?.date ?? data.date)}</span>
           </div>
 
           {/* Main: open pana | huge jodi | close pana */}
@@ -194,8 +196,8 @@ export default function ResultCard({
         {/* Refresh + updated */}
         <div className="mt-2 flex items-center justify-between gap-3 text-[12px]" style={{ color: 'rgb(var(--muted))' }}>
           <span>
-            {data.today?.updatedAt
-              ? <>Updated <span className="num">{timeLabelIST(data.today.updatedAt)}</span></>
+            {shown?.updatedAt
+              ? <>Updated <span className="num">{timeLabelIST(shown.updatedAt)}</span></>
               : null}
           </span>
           <button
