@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { LivePayload } from '@/lib/live';
 import { display, isDoubleJodi } from '@/lib/matka';
 import { SITE } from '@/lib/site';
-import { labelShort, minutesIST, timeLabelIST, todayIST, WEEKDAYS } from '@/lib/time';
+import { labelShort, minutesIST, todayIST, WEEKDAYS } from '@/lib/time';
 
 function statusOf(data: LivePayload, nowMin: number): string {
   const s = data.today?.status;
@@ -193,13 +193,8 @@ export default function ResultCard({
           })}
         </ol>
 
-        {/* Refresh + updated */}
-        <div className="mt-2 flex items-center justify-between gap-3 text-[12px]" style={{ color: 'rgb(var(--muted))' }}>
-          <span>
-            {shown?.updatedAt
-              ? <>Updated <span className="num">{timeLabelIST(shown.updatedAt)}</span></>
-              : null}
-          </span>
+        {/* Refresh */}
+        <div className="mt-2 flex items-center justify-end gap-3 text-[12px]" style={{ color: 'rgb(var(--muted))' }}>
           <button
             type="button"
             onClick={refresh}
