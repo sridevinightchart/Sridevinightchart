@@ -1,0 +1,9 @@
+app copy*/
+audit/
+.next-dev/
+data/*.db
+data/*.db-*
+data/panel-source*.html
+data/sridevi_raw.html
+*.tsbuildinfo
+.env.local
