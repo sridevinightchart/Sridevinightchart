@@ -36,31 +36,36 @@ database backups. Legacy import tools still exist for offline use.
 
 ## Daily behavior
 
-- Six scheduled checks run around/after the publication window and overnight, using
-  UTC cron expressions. GitHub schedules may be delayed and are not exact timers.
-- The updater fetches supported feeds, requires an explicit date and Sridevi Night
-  identity, and checks panna order and the jodi calculation. It never assigns the
-  current date to an undated number or invents a holiday for an absent result.
-- Open-only records can be saved when a supported feed publishes a dated open
-  record. The approved pages currently have undated live blocks; those blocks are not imported.
-  Khabar also returned HTTP 403 to automated requests during the latest check.
-  Until a supported recent date is available, automatic publication is blocked. Publication
-  timing and availability depend on the source; this is not an official result feed.
-- Settled historical full results are not rewritten. Future records are ignored.
-  Conflicts affecting new results fail the run without saving changes. Recent
-  missing dates can be filled during later checks; existing history remains intact.
-- Valid changes are atomically saved, tested, committed, and pushed. The deploy hook
-  publishes them. All page sections, charts, metadata and sitemap read that snapshot.
-- The workflow verifies `/api/result/today/` against the committed snapshot version.
-  A failed deployment is retried on a later scheduled run even if the result file
-  has no further changes. A new record is not live until the deployment completes.
-- If a source is unavailable or has not published a result, the existing records
-  remain. Inspect workflow logs and enable GitHub failure notifications. Third-party
-  layout changes can require parser maintenance; permanent zero-maintenance service
-  cannot be guaranteed. GitHub may disable schedules on inactive public repositories.
-- The final overnight run fails its freshness check if the previous IST date has no
-  completed result or confirmed closure. This surfaces a missed update through
-  workflow failure notifications rather than silently treating missing data as success.
+- Target polling is every five minutes from 7:15 PM through 8:30 PM IST
+  (13:45?15:00 UTC). GitHub schedules can be delayed or dropped; a delayed run
+  outside the window does not assign an undated result to that day.
+- Only the actual live hero sections on the two exact approved URLs are read.
+  Advertisements, guessing blocks, historic table values and article publication
+  dates are excluded. No other source is used as a fallback.
+- Both sites must return a valid Sridevi Night result. Their open pannas must
+  agree. A close is saved only when both sites show the same validated close;
+  a shared valid open can be saved while one site still awaits its close.
+- The owner has authorized dating undated live results by this publication
+  window. This is an inference, not an explicit source date or proof of accuracy.
+  Saved records include provenance stating that basis and the two source URLs.
+- To avoid relabeling yesterday's carried-over number, an unchanged previous
+  full result is withheld. An open matching the previous open is also withheld
+  until a different completed result is confirmed. A genuine identical repeat
+  cannot be distinguished from stale data by these pages alone and is withheld.
+- Outages, invalid numbers, mismatches and conflicts with today's saved result
+  leave existing records untouched. Settled historical results are not rewritten.
+- Valid changes are saved atomically, tested, committed and pushed. The Vercel
+  deploy hook then publishes the new snapshot. The live result API is checked
+  against the committed version; later runs retry a failed deployment.
+- Visitors retain the latest declared result with its actual date until a new
+  one is saved. The card and charts refresh when a new deployment is detected.
+- An overnight run checks whether the previous IST day has a completed result
+  or confirmed closure. Missing data fails that check rather than inventing a
+  holiday. Enable GitHub workflow failure notifications for missed updates.
+- The deploy-hook secret is required to activate publishing. GitHub may disable
+  schedules in inactive public repositories. Source markup changes can require
+  parser maintenance. No exact publication latency or absolute source accuracy
+  is guaranteed by this arrangement.
 
 ## Local verification
 

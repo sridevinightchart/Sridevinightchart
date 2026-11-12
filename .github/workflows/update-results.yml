@@ -2,9 +2,11 @@ name: Update published Sridevi Night results
 
 on:
   schedule:
-    # UTC: retry around and after the evening publication window, plus late catch-up.
-    - cron: '53 13 * * *'
-    - cron: '23,53 14-15 * * *'
+    # UTC: every 5 minutes from 19:15 through 20:30 IST.
+    - cron: '45,50,55 13 * * *'
+    - cron: '*/5 14 * * *'
+    - cron: '0 15 * * *'
+    # Overnight freshness/deployment verification only; the updater does not fetch outside its window.
     - cron: '23 20 * * *'
   workflow_dispatch:
 
