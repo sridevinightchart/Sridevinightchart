@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
   title: { default: 'Sridevi Night Chart – Today\'s Result, Jodi & Panel Chart Record', template: '%s' },
   applicationName: SITE.name,
+  verification: { google: 'svVZs7B1m7nEMMqTTXStFC1Rjuk8xv3O6OnAafzvFrA' },
   icons: {
     icon: [
       { url: '/favicon.svg', type: 'image/svg+xml', sizes: 'any' },
