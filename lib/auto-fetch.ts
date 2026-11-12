@@ -3,20 +3,21 @@ import { parseResultFeed, mergePublished } from './resultFeed';
 import { addDays, todayIST } from './time';
 
 export interface FetchResult { success: boolean; message: string; changed?: boolean; data?: { open: string; close: string; jodi: string }; }
+export const APPROVED_RESULT_SOURCES = [
+  'https://matka-tips.org/record-chart/sridevi-night-jodi',
+  'https://khabar.bet/sridevi-night-matka-chart',
+] as const;
 export async function fetchAndSaveToday(dryRun = false): Promise<FetchResult> {
   const date = todayIST();
-  const sources = [...new Set([
-    process.env.RESULT_SOURCE_URL,
-    process.env.RESULT_SOURCE_URL2,
-    'https://kalyanchart.cyou/sridevi-night-panel-chart/',
-  ].filter(Boolean) as string[])];
+  // Only the two pages explicitly approved by the site owner. No silent fallback.
+  const sources = [...APPROVED_RESULT_SOURCES];
   const incoming = [] as ReturnType<typeof parseResultFeed>;
   const errors: string[] = [];
   const responses = await Promise.allSettled(sources.map(async (url) => {
     const response = await fetch(url, { headers: { 'User-Agent': 'SrideviNightChart/1.0' }, signal: AbortSignal.timeout(20_000), cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const parsed = parseResultFeed(await response.text()).filter((r) => r.date >= addDays(date, -7) && r.date <= date);
-    if (!parsed.length) throw new Error('No supported dated Sridevi Night records found');
+    if (!parsed.length) throw new Error('No explicitly dated recent Sridevi Night record found; undated live numbers cannot be assigned to today');
     return parsed;
   }));
   responses.forEach((response, index) => {

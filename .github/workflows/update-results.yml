@@ -22,8 +22,6 @@ jobs:
     env:
       VERCEL_DEPLOY_HOOK: ${{ secrets.VERCEL_DEPLOY_HOOK }}
       PUBLIC_SITE_URL: ${{ vars.PUBLIC_SITE_URL || 'https://sridevinightchart.com' }}
-      RESULT_SOURCE_URL: ${{ vars.RESULT_SOURCE_URL || 'https://kalyanchart.cyou/sridevi-night-panel-chart/' }}
-      RESULT_SOURCE_URL2: ${{ vars.RESULT_SOURCE_URL2 }}
     steps:
       - uses: actions/checkout@v4
         with:

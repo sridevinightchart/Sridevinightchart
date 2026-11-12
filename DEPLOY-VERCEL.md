@@ -23,9 +23,10 @@ database backups. Legacy import tools still exist for offline use.
    Branch protection must allow this workflow to push the result file, or a suitable
    narrowly scoped publishing credential must be configured by the repository owner.
 5. Add GitHub repository variable `PUBLIC_SITE_URL=https://sridevinightchart.com`.
-   Optional `RESULT_SOURCE_URL` and `RESULT_SOURCE_URL2` variables can specify
-   supported dated feeds. The default is the dated Sridevi Night panel archive at
-   `https://kalyanchart.cyou/sridevi-night-panel-chart/`.
+   Sources are restricted in lib/auto-fetch.ts to the two owner-approved pages:
+   https://matka-tips.org/record-chart/sridevi-night-jodi and
+   https://khabar.bet/sridevi-night-matka-chart . Environment variables cannot
+   silently add other sources.
 6. Connect the custom domain, DNS and TLS in Vercel. Both the apex and www hostnames
    need to reach the project. The application redirects the live HTTP/www variants
    to HTTPS non-www; development and Vercel preview URLs are not redirected.
@@ -41,7 +42,9 @@ database backups. Legacy import tools still exist for offline use.
   identity, and checks panna order and the jodi calculation. It never assigns the
   current date to an undated number or invents a holiday for an absent result.
 - Open-only records can be saved when a supported feed publishes a dated open
-  record. The default panel archive may only publish completed results. Publication
+  record. The approved pages currently have undated live blocks; those blocks are not imported.
+  Khabar also returned HTTP 403 to automated requests during the latest check.
+  Until a supported recent date is available, automatic publication is blocked. Publication
   timing and availability depend on the source; this is not an official result feed.
 - Settled historical full results are not rewritten. Future records are ignored.
   Conflicts affecting new results fail the run without saving changes. Recent

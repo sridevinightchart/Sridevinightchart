@@ -1,4 +1,5 @@
 import { ank, isValidPana, jodiFrom, type Result } from './matka';
+import { addDays } from './time';
 
 function validDate(value: string): boolean {
   return /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value)) && new Date(value).toISOString().slice(0, 10) === value;
@@ -36,6 +37,29 @@ export function parseResultFeed(body: string, now = new Date().toISOString()): R
   for (const row of body.matchAll(/<tr\b[^>]*>([\s\S]*?)<\/tr>/gi)) {
     const date = row[1].match(/<td[^>]*>\s*(\d{4}-\d{2}-\d{2})\s*<\/td>/i)?.[1];
     if (date) add(date, row[1].replace(/<td[^>]*>\s*\d{4}-\d{2}-\d{2}\s*<\/td>/i, ''));
+    // Dated Monday–Sunday panel rows. Preserve colspan holiday cells so dates never shift.
+    const cells = [...row[1].matchAll(/<td\b([^>]*)>([\s\S]*?)<\/td>/gi)];
+    if (!cells.length) continue;
+    const dates = [...cells[0][2].matchAll(/(\d{2})\/(\d{2})\/(\d{4}|\d{2})(?!\d)/g)].map((m) => `${m[3].length === 2 ? '20' + m[3] : m[3]}-${m[2]}-${m[1]}`);
+    if (dates.length !== 2 || !dates.every(validDate)) continue;
+    const [monday, sunday] = dates;
+    if (new Date(monday + 'T00:00:00Z').getUTCDay() !== 1 || addDays(monday, 6) !== sunday) continue;
+    const values = cells.slice(1).flatMap((cell) => {
+      const value = cell[2].replace(/<[^>]+>/g, '').replace(/&nbsp;|&#160;/gi, '').replace(/\s/g, '');
+      const span = Number(cell[1].match(/colspan\s*=\s*["']?(\d+)/i)?.[1] ?? 1);
+      // Khabar uses widths 2/3/2 for open/jodi/close and 7 for a whole missing day.
+      if (span === 2 && /^(?:\d{3}|\*{3})$/.test(value)) return [value];
+      if (span === 3 && /^(?:\d{2}|\d\*)$/.test(value)) return [value];
+      if ((span === 3 || span === 7) && /^(?:\*+|✪)?$/.test(value)) return ['***', '**', '***'];
+      return span === 1 ? [value] : ['INVALID'];
+    });
+    if (values.length !== 21) continue;
+    for (let day = 0; day < 7; day++) {
+      const [open, rawJodi, close] = values.slice(day * 3, day * 3 + 3);
+      const jodi = /^\d$/.test(rawJodi) && close === '***' ? `${rawJodi}*` : rawJodi;
+      const record = sourceRecord(addDays(monday, day), open, jodi, close, now);
+      if (record) records.push(record);
+    }
   }
   return records;
 }

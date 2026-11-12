@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
-import { fetchAndSaveToday } from '../lib/auto-fetch';
+import { APPROVED_RESULT_SOURCES, fetchAndSaveToday } from '../lib/auto-fetch';
 let directory: string;
 let file: string;
 const feed = { market: 'Sridevi Night', date: '2026-11-12', open: '238', jodi: '33', close: '490' };
@@ -31,6 +31,13 @@ describe('automatic file update pipeline', () => {
     vi.setSystemTime(new Date('2026-11-12T15:30:00Z'));
     expect((await fetchAndSaveToday()).changed).toBe(false);
     expect(fs.readFileSync(file, 'utf8')).toBe(first);
+  });
+  it('uses only the two exact approved pages even when stale environment URLs exist', async () => {
+    vi.stubEnv('RESULT_SOURCE_URL', 'https://unapproved.example/feed');
+    await fetchAndSaveToday(true);
+    const calledUrls = vi.mocked(fetch).mock.calls.map((call) => call[0]);
+    expect(calledUrls).toEqual([...APPROVED_RESULT_SOURCES]);
+    expect(calledUrls).not.toContain('https://unapproved.example/feed');
   });
   it('does not write in dry runs or when sources fail', async () => {
     expect((await fetchAndSaveToday(true)).changed).toBe(true);
