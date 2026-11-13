@@ -7,12 +7,12 @@ import { display, isDoubleJodi } from '@/lib/matka';
 import { SITE } from '@/lib/site';
 import { labelShort, minutesIST, todayIST, WEEKDAYS } from '@/lib/time';
 
-function statusOf(data: LivePayload, nowMin: number): string {
+function statusOf(data: LivePayload, nowMin: number, openMinute: number): string {
   const s = data.today?.status;
   if (s === 'closed') return 'Result declared';
   if (s === 'open') return 'Open declared — waiting for close';
   if (s === 'holiday') return 'No result today';
-  if (nowMin < SITE.openMinute) return 'Awaiting open result';
+  if (nowMin < openMinute) return 'Awaiting open result';
   return 'Waiting for result…';
 }
 
@@ -20,10 +20,18 @@ export default function ResultCard({
   initial,
   initialMinutes,
   title = 'Sridevi Night result today',
+  endpoint = '/api/result/today/',
+  openMinute = SITE.openMinute,
+  pollStartMinute = SITE.pollStartMinute,
+  pollEndMinute = SITE.pollEndMinute,
 }: {
   initial: LivePayload;
   initialMinutes: number;
   title?: string;
+  endpoint?: string;
+  openMinute?: number;
+  pollStartMinute?: number;
+  pollEndMinute?: number;
 }) {
   const [data, setData] = useState(initial);
   const [nowMin, setNowMin] = useState(initialMinutes);
@@ -37,7 +45,7 @@ export default function ResultCard({
     setLoading(true);
     setError('');
     try {
-      const res = await fetch('/api/result/today/', { cache: 'no-store' });
+      const res = await fetch(endpoint, { cache: 'no-store' });
       if (!res.ok) throw new Error(String(res.status));
       const next = await res.json() as LivePayload;
       setData(next);
@@ -53,14 +61,14 @@ export default function ResultCard({
       setNowMin(minutesIST());
       lastPoll.current = Date.now();
     }
-  }, [router]);
+  }, [router, endpoint]);
 
   useEffect(() => {
     if (todayIST() !== initial.date) refresh();
     setNowMin(minutesIST());
     const inWindow = () => {
       const m = minutesIST();
-      return m >= SITE.pollStartMinute && m <= SITE.pollEndMinute;
+      return m >= pollStartMinute && m <= pollEndMinute;
     };
     const tick = () => {
       setNowMin(minutesIST());
@@ -75,14 +83,14 @@ export default function ResultCard({
       window.clearInterval(id);
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [initial.date, refresh]);
+  }, [initial.date, refresh, pollStartMinute, pollEndMinute]);
 
   const declared = data.today?.status === 'closed' || data.today?.status === 'open';
   const shown = declared ? data.today : (data.latest ?? (data.yesterday?.status === 'closed' ? data.yesterday : null));
   const previous = !!shown && shown.date !== data.date;
   const d = display(shown);
   const y = display(data.yesterday);
-  const status = statusOf(data, nowMin);
+  const status = statusOf(data, nowMin, openMinute);
 
   return (
     <figure className="flex flex-col gap-3.5" aria-live="polite">

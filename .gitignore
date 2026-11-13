@@ -16,3 +16,5 @@ audit/
 data/*
 !data/results.json
 !data/sridevi-night.csv
+
+!data/sridevi-day.json

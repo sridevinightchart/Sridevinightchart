@@ -225,7 +225,7 @@ export default function HomePage() {
             panna, the jodi, and the close panna.
           </p>
           <p>
-            There are two Sridevi markets, day and night, and their results are never the same. This
+            There are two Sridevi markets, <Link href="/sridevi-chart/">day</Link> and night, and their results are never the same. This
             chart covers only the night market, so a day result never ends up in it.
           </p>
           <p>

@@ -6,7 +6,7 @@ export interface QA {
   a: string;
 }
 
-export default function Faq({ items, id = 'faq' }: { items: QA[]; id?: string }) {
+export default function Faq({ items, id = 'faq', pagePath = '/' }: { items: QA[]; id?: string; pagePath?: string }) {
   return (
     <>
       <div className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
@@ -26,8 +26,8 @@ export default function Faq({ items, id = 'faq' }: { items: QA[]; id?: string })
         data={{
           '@context': 'https://schema.org',
           '@type': 'FAQPage',
-          '@id': `${SITE.url}/#faq`,
-          isPartOf: { '@id': `${SITE.url}/#webpage` },
+          '@id': `${SITE.url}${pagePath}#faq`,
+          isPartOf: { '@id': `${SITE.url}${pagePath}#webpage` },
           inLanguage: 'en-IN',
           mainEntity: items.map((it) => ({ '@type': 'Question', name: it.q, acceptedAnswer: { '@type': 'Answer', text: it.a } })),
         }}

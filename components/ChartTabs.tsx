@@ -11,11 +11,15 @@ export default function ChartTabs({
   blocks,
   today,
   archiveYears = [],
+  market = 'Sridevi Night',
+  distinguishMissing = false,
 }: {
   type: 'jodi' | 'panel';
   blocks: Block[];  // sorted newest-year-first
   today: string;
   archiveYears?: number[];
+  market?: string;
+  distinguishMissing?: boolean;
 }) {
   const Chart = type === 'jodi' ? JodiChart : PanelChart;
   const years = blocks.map((b) => b.year);
@@ -138,7 +142,8 @@ export default function ChartTabs({
         <Chart
           weeks={activeBlock.weeks}
           today={today}
-          caption={`Sridevi Night ${type} chart ${active}, week by week`}
+          distinguishMissing={distinguishMissing}
+          caption={`${market} ${type} chart ${active}, week by week`}
         />
       )}
 
@@ -154,7 +159,8 @@ export default function ChartTabs({
               <Chart
                 weeks={block.weeks}
                 today={today}
-                caption={`Sridevi Night ${type} chart ${block.year}`}
+                distinguishMissing={distinguishMissing}
+                caption={`${market} ${type} chart ${block.year}`}
               />
             </div>
           ))}

@@ -3,12 +3,12 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
-import { ROUTES } from '@/lib/site';
 
 const LINKS = [
-  { href: ROUTES.today, label: 'Result today' },
-  { href: ROUTES.jodi, label: 'Jodi chart' },
-  { href: ROUTES.panel, label: 'Panel chart' },
+  { href: '/', label: 'Home' },
+  { href: '/sridevi-chart/', label: 'Sridevi Chart (Day)' },
+  { href: '/about/', label: 'About' },
+  { href: '/contact/', label: 'Contact' },
 ];
 
 export function MobileNav({ years }: { years: number[] }) {

@@ -53,9 +53,10 @@ interface ChartProps {
   weeks: Week[];
   today: string;
   caption: string;
+  distinguishMissing?: boolean;
 }
 
-export function JodiChart({ weeks, today, caption }: ChartProps) {
+export function JodiChart({ weeks, today, caption, distinguishMissing = false }: ChartProps) {
   const currentMonday = mondayOf(today);
   return (
     <div className="chart-scroll">
@@ -78,7 +79,7 @@ export function JodiChart({ weeks, today, caption }: ChartProps) {
                 return (
                   <td key={c.date} className="day">
                     <span id={`j-${c.date}`} data-date={c.date} className={cls} aria-label={cellLabel(c)} title={cellLabel(c)}>
-                      {c.kind === 'future' ? '' : d.jodi}
+                      {c.kind === 'future' ? '' : distinguishMissing && c.kind === 'missing' ? '�' : d.jodi}
                     </span>
                   </td>
                 );
@@ -101,7 +102,7 @@ function Digits({ value }: { value: string }) {
   );
 }
 
-export function PanelChart({ weeks, today, caption }: ChartProps) {
+export function PanelChart({ weeks, today, caption, distinguishMissing = false }: ChartProps) {
   const currentMonday = mondayOf(today);
   return (
     <div className="chart-scroll panel-chart">
@@ -124,7 +125,7 @@ export function PanelChart({ weeks, today, caption }: ChartProps) {
                 return (
                   <td key={c.date} className="day">
                     <span id={`p-${c.date}`} data-date={c.date} className={cls} aria-label={cellLabel(c)} title={cellLabel(c)}>
-                      {c.kind === 'future' ? null : (
+                      {c.kind === 'future' ? null : distinguishMissing && c.kind === 'missing' ? <span className={jodiCls}>�</span> : (
                         <>
                           <Digits value={d.open} />
                           <span className={jodiCls} aria-hidden="true">{d.jodi}</span>
