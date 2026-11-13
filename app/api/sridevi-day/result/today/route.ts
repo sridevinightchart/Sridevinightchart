@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server';
-import { buildDayLive } from '@/lib/day';
+import { currentMarketState } from '@/lib/currentResults';
+import { buildDayLive, dayResults } from '@/lib/day';
 export const dynamic = 'force-dynamic';
-export function GET() {
-  return NextResponse.json(buildDayLive(), { headers: { 'Cache-Control': 'no-store' } });
+export async function GET() {
+  const state = await currentMarketState('day', dayResults());
+  return NextResponse.json({ ...buildDayLive(new Date(), state.records), sourceStatus: state.sourceStatus, sourceCheckedAt: state.checkedAt }, { headers: { 'Cache-Control': 'no-store' } });
 }
+
+export const runtime = 'nodejs';
+export const maxDuration = 30;

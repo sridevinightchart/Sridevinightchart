@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import resultExplanation from './sridevi-night-result-open-panna-jodi-close-panna.webp';
 import chartReading from './sridevi-night-jodi-chart-how-to-read.webp';
+import { currentResults } from '@/lib/currentResults';
 import ResultCard from '@/components/ResultCard';
 import { EDITORIAL_MODIFIED } from '@/lib/pages';
 import ChartTabs from '@/components/ChartTabs';
@@ -14,7 +15,8 @@ import * as repo from '@/lib/repo';
 import { ROUTES, SITE } from '@/lib/site';
 import { minutesIST, parseDay, todayIST } from '@/lib/time';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 
 export const metadata: Metadata = {
   title: "Sridevi Night Chart: Today's Result, Jodi & Panel Chart",
@@ -84,17 +86,18 @@ function Sec({ id, title, children }: { id: string; title: React.ReactNode; chil
 }
 
 /* ─── page ────────────────────────────────────────── */
-export default function HomePage() {
+export default async function HomePage() {
+  const records = await currentResults('night', repo.getAll());
   const today = todayIST();
-  const live = buildLive();
+  const live = buildLive(new Date(), records);
   const years = repo.years();
   const first = repo.firstDate();
-  const yearNums = years.map((y) => y.year);
+  const yearNums = Array.from(new Set([...years.map((y) => y.year), Number(today.slice(0, 4))]));
   // All years' data grouped — newest first so the most recent chart is at the top
   const allBlocks = yearNums
     .slice()
     .reverse()
-    .map((year) => ({ year, weeks: weeksForYear(year, today) }))
+    .map((year) => ({ year, weeks: weeksForYear(year, today, records) }))
     .filter((b) => b.weeks.length > 0);
   const pageUpdated = [repo.lastUpdated() ?? '', EDITORIAL_MODIFIED].sort().at(-1)!;
   const totalResults = years.reduce((sum, y) => sum + y.results, 0);

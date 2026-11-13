@@ -9,7 +9,7 @@
     "import": "tsx scripts/import.ts",
     "test": "vitest run",
     "lint": "next lint",
-    "update-results": "tsx scripts/auto-fetch-result.ts",
+    "update-results": "tsx scripts/update-markets.ts",
     "validate-results": "tsx scripts/validate-results.ts"
   },
   "dependencies": {

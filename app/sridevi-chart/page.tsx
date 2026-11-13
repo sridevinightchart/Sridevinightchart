@@ -2,16 +2,18 @@
 import Image from 'next/image';
 import chartComparison from '../sridevi-panel-chart-vs-jodi-chart.webp';
 import chartHistory from '../sridevi-day-chart-history.webp';
+import { currentResults } from '@/lib/currentResults';
 import ResultCard from '@/components/ResultCard';
 import ChartTabs from '@/components/ChartTabs';
 import Faq, { type QA } from '@/components/Faq';
 import JsonLd from '@/components/JsonLd';
-import { buildDayLive, dayBlocks, DAY_MODIFIED } from '@/lib/day';
+import { buildDayLive, dayBlocks, dayResults, DAY_MODIFIED } from '@/lib/day';
 import { dayMetadata, DAY_TITLE, DAY_DESCRIPTION } from '@/lib/daySeo';
 import { abs } from '@/lib/site';
 import { minutesIST, todayIST } from '@/lib/time';
 
-export const revalidate = 300;
+export const dynamic = 'force-dynamic';
+export const maxDuration = 30;
 export const metadata = dayMetadata;
 const faq: QA[] = [
   { q: 'Is the Sridevi chart the same as the Sridevi Day chart?', a: 'Yes. Sridevi and Sridevi Day are two names for the same day market. Sridevi Night is a different market, and it has its own chart.' },
@@ -27,14 +29,16 @@ function Section({ id, title, wide = false, children }: { id: string; title: str
     {children}
   </section>;
 }
-export default function SrideviDayPage() {
+export default async function SrideviDayPage() {
+  const records = await currentResults('day', dayResults());
   const today = todayIST();
-  const blocks = dayBlocks(today);
+  const blocks = dayBlocks(today, records);
   const url = abs('/sridevi-chart/');
+  const pageUpdated = [DAY_MODIFIED, ...dayResults().map((r) => r.updatedAt)].sort().at(-1)!;
   return <>
     <JsonLd data={{ '@context': 'https://schema.org', '@graph': [
-      { '@type': 'WebPage', '@id': `${url}#webpage`, url, name: DAY_TITLE, description: DAY_DESCRIPTION, inLanguage: 'en-IN', isPartOf: { '@id': abs('/#website') }, dateModified: DAY_MODIFIED, mainEntity: { '@id': `${url}#article` } },
-      { '@type': 'Article', '@id': `${url}#article`, headline: 'Sridevi Chart', description: DAY_DESCRIPTION, inLanguage: 'en-IN', mainEntityOfPage: { '@id': `${url}#webpage` }, image: abs('/sridevi-day-opengraph.png'), dateModified: DAY_MODIFIED, about: { '@type': 'Thing', name: 'Sridevi Day results, panel chart and jodi chart' }, hasPart: ['Sridevi Day Result Today', 'Sridevi Panel Chart', 'Sridevi Jodi Chart', 'History of Sridevi Day Chart', 'Sridevi Chart FAQs'].map((name) => ({ '@type': 'WebPageElement', name })) },
+      { '@type': 'WebPage', '@id': `${url}#webpage`, url, name: DAY_TITLE, description: DAY_DESCRIPTION, inLanguage: 'en-IN', isPartOf: { '@id': abs('/#website') }, dateModified: pageUpdated, mainEntity: { '@id': `${url}#article` } },
+      { '@type': 'Article', '@id': `${url}#article`, headline: 'Sridevi Chart', description: DAY_DESCRIPTION, inLanguage: 'en-IN', mainEntityOfPage: { '@id': `${url}#webpage` }, image: abs('/sridevi-day-opengraph.png'), dateModified: pageUpdated, about: { '@type': 'Thing', name: 'Sridevi Day results, panel chart and jodi chart' }, hasPart: ['Sridevi Day Result Today', 'Sridevi Panel Chart', 'Sridevi Jodi Chart', 'History of Sridevi Day Chart', 'Sridevi Chart FAQs'].map((name) => ({ '@type': 'WebPageElement', name })) },
     ] }} />
     <div className="mx-auto max-w-site px-6 pt-7 sm:pt-12 lg:pt-16">
       <div className="grid gap-10 lg:grid-cols-2 lg:gap-16 lg:items-start">
@@ -44,7 +48,7 @@ export default function SrideviDayPage() {
         </div>
         <section id="result-today" aria-labelledby="result-today-h">
           <h2 id="result-today-h" className="disp text-[32px] font-extrabold leading-tight mb-4">Sridevi Day Result Today</h2>
-          <ResultCard initial={buildDayLive()} initialMinutes={minutesIST()} title="Sridevi Day result today" endpoint="/api/sridevi-day/result/today/" openMinute={695} pollStartMinute={685} pollEndMinute={780} />
+          <ResultCard initial={buildDayLive(new Date(), records)} initialMinutes={minutesIST()} title="Sridevi Day result today" endpoint="/api/sridevi-day/result/today/" openMinute={695} pollStartMinute={685} pollEndMinute={900} />
         </section>
       </div>
     </div>

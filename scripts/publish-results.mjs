@@ -1,16 +1,23 @@
 import fs from 'node:fs';
 
-const rows = JSON.parse(fs.readFileSync('data/results.json', 'utf8'));
-const expected = rows.reduce((latest, row) => row.updatedAt > latest ? row.updatedAt : latest, '');
+const snapshots = [
+  { file: 'data/results.json', endpoint: '/api/result/today/' },
+  { file: 'data/sridevi-day.json', endpoint: '/api/sridevi-day/result/today/' },
+].map(({ file, endpoint }) => ({ endpoint, expected: JSON.parse(fs.readFileSync(file, 'utf8')).reduce((latest, row) => row.updatedAt > latest ? row.updatedAt : latest, '') }));
 const base = process.env.PUBLIC_SITE_URL || 'https://sridevinightchart.com';
 async function published() {
-  try {
-    const response = await fetch(`${base.replace(/\/$/, '')}/api/result/today/?verify=${Date.now()}`, { cache: 'no-store', signal: AbortSignal.timeout(10_000) });
-    return response.ok && (await response.json()).version === expected;
-  } catch { return false; }
+  const checks = await Promise.all(snapshots.map(async ({ endpoint, expected }) => {
+    try {
+      const response = await fetch(base.replace(/\/$/, '') + endpoint + '?verify=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(20_000) });
+      if (!response.ok) return false;
+      const data = await response.json();
+      return (data.snapshotVersion ?? data.version) === expected;
+    } catch { return false; }
+  }));
+  return checks.every(Boolean);
 }
 if (await published()) {
-  console.log('Live site already serves the expected results snapshot.');
+  console.log('Live site already serves the expected Day and Night snapshots.');
 } else {
   const hook = process.env.VERCEL_DEPLOY_HOOK;
   if (!hook || new URL(hook).hostname !== 'api.vercel.com') throw new Error('A valid Vercel deploy hook secret is required.');
@@ -23,5 +30,5 @@ if (await published()) {
     if (await published()) { verified = true; break; }
   }
   if (!verified) throw new Error('New data is committed, but the production snapshot is not verified yet. The next scheduled run will retry deployment.');
-  console.log('Verified: the live site serves the committed results snapshot.');
+  console.log('Verified: the live site serves the committed Day and Night snapshots.');
 }

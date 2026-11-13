@@ -9,7 +9,7 @@ export const SITE = {
   openMinute: 19 * 60 + 15,
   closeMinute: 20 * 60 + 15,
   pollStartMinute: 19 * 60 + 5,
-  pollEndMinute: 20 * 60 + 45,
+  pollEndMinute: 23 * 60 + 59,
 };
 
 export const ROUTES = {

@@ -1,4 +1,4 @@
-import { groupByWeek, weekYear, type Week } from './matka';
+import { groupByWeek, weekYear, type Result, type Week } from './matka';
 import * as repo from './repo';
 import { addDays, mondayOf, todayIST } from './time';
 
@@ -11,10 +11,10 @@ export function recentWeeks(n: number, today = todayIST()): Week[] {
 }
 
 /** Weeks belonging to a calendar year (a week belongs to the year of its Thursday) */
-export function weeksForYear(year: number, today = todayIST()): Week[] {
+export function weeksForYear(year: number, today = todayIST(), records: Result[] = repo.getAll()): Week[] {
   const from = addDays(`${year}-01-01`, -6);
   const to = addDays(`${year}-12-31`, 6);
-  const rows = repo.getRange(from, to);
+  const rows = records.filter((r) => r.date >= from && r.date <= to);
   if (!rows.length) return [];
   const lastData = rows[rows.length - 1].date;
   const endDay = String(year) === today.slice(0, 4) ? (today > lastData ? today : lastData) : `${year}-12-31`;

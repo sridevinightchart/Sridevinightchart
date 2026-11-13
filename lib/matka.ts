@@ -9,7 +9,7 @@ export interface Result {
   jodi: string | null;
   status: Status;
   updatedAt: string; // ISO timestamp
-  provenance?: { dateBasis: 'owner-approved-publication-window'; observedAt: string; sources: string[] };
+  provenance?: { dateBasis: 'owner-approved-publication-window' | 'dated-source-agreement'; observedAt: string; sources: string[] };
 }
 
 /** Ank (single digit) of a pana: digit sum mod 10. 238 → 3 */

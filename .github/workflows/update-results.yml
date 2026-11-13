@@ -1,12 +1,17 @@
-name: Update published Sridevi Night results
+﻿name: Update verified Sridevi Day and Night results
 
 on:
   schedule:
-    # UTC: every 5 minutes from 19:15 IST until the end of the same IST day.
-    - cron: '45,50,55 13 * * *'
-    - cron: '*/5 14-17 * * *'
-    - cron: '0,5,10,15,20,25 18 * * *'
-    # Overnight freshness/deployment verification only; the updater does not fetch outside its window.
+    # UTC; IST is UTC +05:30. Live APIs also check sources independently of this schedule.
+    - cron: '7,12,17,22,27,32,37,42,47,52,57 6 * * *'
+    - cron: '2,7,12,17,22,27,32,37,42,47,52,57 7 * * *'
+    - cron: '7,22,37,52 8 * * *'
+    - cron: '47,52,57 13 * * *'
+    - cron: '2,7,12,17,22,27,32,37,42,47,52,57 14-17 * * *'
+    - cron: '2,7,12,17,22,27 18 * * *'
+    # Dated catch-up still works when jobs start after midnight or a source recovers.
+    - cron: '23 0-5,9,11-12,19,21-23 * * *'
+    - cron: '23 10 * * *'
     - cron: '23 20 * * *'
   workflow_dispatch:
 
@@ -32,30 +37,41 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - name: Check one-time deployment setup
+      - name: Check deployment setup
         shell: bash
         run: |
           if [ -z "$VERCEL_DEPLOY_HOOK" ]; then
-            echo '::error::Add the VERCEL_DEPLOY_HOOK repository secret before enabling automatic publishing.'
+            echo '::error::The VERCEL_DEPLOY_HOOK repository secret is required.'
             exit 1
           fi
       - run: npm ci
       - run: npm run validate-results
-      - run: npm run update-results
+      - name: Fetch both markets independently
+        id: sources
+        continue-on-error: true
+        run: npm run update-results
       - run: npm run validate-results
       - run: npm test
       - name: Commit validated changes
         shell: bash
         run: |
-          if ! git diff --quiet -- data/results.json; then
+          if ! git diff --quiet -- data/results.json data/sridevi-day.json; then
             git config user.name 'github-actions[bot]'
             git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-            git add data/results.json
-            git commit -m 'Update validated Sridevi Night results'
+            git add data/results.json data/sridevi-day.json
+            git commit -m 'Update verified Sridevi Day and Night results'
             git push origin "HEAD:${{ github.event.repository.default_branch }}"
           fi
-      - name: Deploy and verify published data
+      - name: Deploy and verify both production snapshots
         run: node scripts/publish-results.mjs
-      - name: Check final daily result freshness
+      - name: Check Day freshness after the afternoon window
+        if: github.event_name == 'schedule' && github.event.schedule == '23 10 * * *'
+        run: npx tsx scripts/check-result-freshness.ts --day
+      - name: Check both final records after midnight
         if: github.event_name == 'schedule' && github.event.schedule == '23 20 * * *'
         run: npx tsx scripts/check-result-freshness.ts
+      - name: Report source failures after publishing the other market
+        if: steps.sources.outcome == 'failure'
+        run: |
+          echo '::error::At least one source check failed. Valid results from the other market were still published; saved records were retained for the unavailable market.'
+          exit 1

@@ -26,7 +26,7 @@ Raw HTML downloads, the local import utility, and per-date disagreements are ret
 
 ## Refreshing
 
-This addition supplies a Day snapshot and a separate read-only Day result API. The existing scheduled updater remains **Night-only**. Polling the Day API does not itself fetch new upstream data. A separate, verified Day ingestion workflow is still needed for unattended Day updates; do not imply that the Night schedule updates this page.
+Day and Night now share the validated live-read and scheduled-persistence pipeline described in [automatic-results.md](automatic-results.md). Both pages and APIs can read current source-agreed results without waiting for a deployment. The scheduled workflow persists new records to the separate JSON snapshots and verifies both production snapshots. Historical disagreements below remain withheld.
 
 ## Withheld historical dates
 
