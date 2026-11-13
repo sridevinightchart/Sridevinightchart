@@ -36,8 +36,8 @@ database backups. Legacy import tools still exist for offline use.
 
 ## Daily behavior
 
-- Target polling is every five minutes from 7:15 PM through 8:30 PM IST
-  (13:45?15:00 UTC). GitHub schedules can be delayed or dropped; a delayed run
+- Target polling is every five minutes from 7:15 PM through 11:55 PM IST
+  (13:45?18:25 UTC), with validation allowed until 11:59 PM IST. GitHub schedules can be delayed or dropped; a delayed run
   outside the window does not assign an undated result to that day.
 - Only the actual live hero sections on the two exact approved URLs are read.
   Advertisements, guessing blocks, historic table values and article publication

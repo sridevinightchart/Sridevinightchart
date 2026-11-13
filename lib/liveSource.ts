@@ -3,7 +3,8 @@ import type { Result } from './matka';
 import { ank } from './matka';
 import { minutesIST, todayIST } from './time';
 
-export const LIVE_WINDOW = { start: 19 * 60 + 15, end: 20 * 60 + 30 };
+// Keep checking until the end of the IST day so delayed jobs/late closes can catch up.
+export const LIVE_WINDOW = { start: 19 * 60 + 15, end: 23 * 60 + 59 };
 export interface HeroResult { open: string; jodi: string; close: string; date?: string; }
 
 /** Read only the actual live hero, excluding adverts, chart history and scripts. */
@@ -27,9 +28,12 @@ export function parseLiveHero(html: string, source: string): HeroResult | null {
   if (end < 0) return null;
   const hero = rest.slice(0, end);
   const plain = hero.replace(/<[^>]*>/g, ' ').replace(/&nbsp;|&#\d+;/g, ' ').replace(/\s+/g, ' ');
-  const matches = [...plain.matchAll(/\bSRIDEVI\s+NIGHT\s*(?:⏳\s*)?(\d{3})\s*[-–]\s*(\d{1,2}|\d\*)\s*[-–]\s*(\d{3}|\*{3})/gi)];
+  const matches = [...plain.matchAll(/\bSRIDEVI\s+NIGHT\s*(?:⏳\s*)?(\d{3})\s*[-–]\s*(\d{1,2}|\d\*)(?:\s*[-–]\s*(\d{3}|\*{3}))?(?=\s|$)/gi)];
   if (matches.length !== 1) return null;
-  const [, open, middle, close] = matches[0];
+  const [, open, middle, suppliedClose] = matches[0];
+  // Some live blocks show only "470-1" during open publication.
+  if (!suppliedClose && !/^\d\*?$/.test(middle)) return null;
+  const close = suppliedClose ?? '***';
   const jodi = /^\d$/.test(middle) && close === '***' ? `${middle}*` : middle;
   const date = hero.match(/\b(?:data-date|datetime)\s*=\s*["'](\d{4}-\d{2}-\d{2})["']/i)?.[1];
   return { open, jodi, close, ...(date ? { date } : {}) };
@@ -37,7 +41,7 @@ export function parseLiveHero(html: string, source: string): HeroResult | null {
 
 export function agreedLiveResult(heroes: (HeroResult | null)[], existing: Result[], now = new Date()): { record: Result | null; message: string } {
   const date = todayIST(now), minute = minutesIST(now);
-  if (minute < LIVE_WINDOW.start || minute > LIVE_WINDOW.end) return { record: null, message: 'Outside 7:15–8:30 PM IST; no undated live number assigned to today.' };
+  if (minute < LIVE_WINDOW.start || minute > LIVE_WINDOW.end) return { record: null, message: 'Outside the evening publication/retry window; no undated live number assigned to today.' };
   if (heroes.length !== 2 || heroes.some((hero) => !hero)) throw new Error('Both approved live heroes must be available. Existing result retained.');
   const [a, b] = heroes as HeroResult[];
   if ([a, b].some((hero) => hero.date && hero.date !== date)) throw new Error('Source hero has a different date; existing result retained.');

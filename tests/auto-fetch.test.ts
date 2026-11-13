@@ -46,7 +46,14 @@ describe('automatic file update pipeline', () => {
     expect((await fetchAndSaveToday(true)).changed).toBe(true);
     expect(JSON.parse(fs.readFileSync(file, 'utf8'))).toEqual([prior]);
     vi.stubGlobal('fetch', vi.fn(async () => { throw new Error('Offline'); }));
-    expect((await fetchAndSaveToday()).success).toBe(false);
+    const attempt = fetchAndSaveToday();
+    await vi.runAllTimersAsync();
+    expect((await attempt).success).toBe(false);
     expect(JSON.parse(fs.readFileSync(file, 'utf8'))).toEqual([prior]);
+  });
+  it('still fetches and publishes an agreed result after 8:30 PM IST', async () => {
+    vi.setSystemTime(new Date('2026-11-12T16:30:00Z'));
+    expect((await fetchAndSaveToday()).changed).toBe(true);
+    expect(JSON.parse(fs.readFileSync(file, 'utf8')).some((r: { date: string }) => r.date === '2026-11-12')).toBe(true);
   });
 });

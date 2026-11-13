@@ -22582,5 +22582,21 @@
     "jodi": "70",
     "status": "closed",
     "updatedAt": "2026-11-12T19:30:53.078Z"
+  },
+  {
+    "date": "2026-11-13",
+    "openPana": "470",
+    "closePana": "370",
+    "jodi": "10",
+    "status": "closed",
+    "updatedAt": "2026-11-13T16:38:15.620Z",
+    "provenance": {
+      "dateBasis": "owner-approved-publication-window",
+      "observedAt": "2026-11-13T16:38:15.620Z",
+      "sources": [
+        "https://matka-tips.org/record-chart/sridevi-night-jodi",
+        "https://khabar.bet/sridevi-night-matka-chart"
+      ]
+    }
   }
 ]

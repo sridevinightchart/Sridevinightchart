@@ -10,12 +10,23 @@ export const APPROVED_RESULT_SOURCES = [
 ] as const;
 export async function fetchAndSaveToday(dryRun = false): Promise<FetchResult> {
   const now = new Date(), date = todayIST(now), minute = minutesIST(now);
-  if (minute < LIVE_WINDOW.start || minute > LIVE_WINDOW.end) return { success: true, changed: false, message: 'Outside 7:15–8:30 PM IST; retained last declared result.' };
+  if (minute < LIVE_WINDOW.start || minute > LIVE_WINDOW.end) return { success: true, changed: false, message: 'Before the evening publication window; retained last declared result.' };
   try {
     const heroes = await Promise.all(APPROVED_RESULT_SOURCES.map(async (url) => {
-      const response = await fetch(url, { headers: { 'User-Agent': 'SrideviNightChart/1.0', 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(20_000), cache: 'no-store' });
-      if (!response.ok) throw new Error(`${new URL(url).hostname}: HTTP ${response.status}. Existing records retained.`);
-      return parseLiveHero(await response.text(), url);
+      let failure = '';
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt) await new Promise((resolve) => setTimeout(resolve, attempt * 1000));
+        try {
+          const response = await fetch(url, { headers: { 'User-Agent': 'SrideviNightChart/1.0', 'Cache-Control': 'no-cache' }, signal: AbortSignal.timeout(20_000), cache: 'no-store' });
+          if (!response.ok) { failure = `HTTP ${response.status}`; continue; }
+          const body = await response.text();
+          const hero = parseLiveHero(body, url);
+          if (hero) return hero;
+          const title = body.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1].slice(0, 100) ?? 'no page title';
+          failure = `live hero not recognized (${title})`;
+        } catch (error) { failure = error instanceof Error ? error.message : String(error); }
+      }
+      throw new Error(`${new URL(url).hostname}: ${failure}. Existing records retained.`);
     }));
     // Evaluate at completion too: a delayed request must not publish outside the window or across midnight.
     const checkedAt = new Date();
