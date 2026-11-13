@@ -21,6 +21,7 @@ export default function ChartTabs({
   const years = blocks.map((b) => b.year);
   const [active, setActive] = useState<number | 'all'>(years[0] ?? 'all');
   const [findMessage, setFindMessage] = useState('');
+  const [selectedDate, setSelectedDate] = useState('');
 
   function findDate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -114,11 +115,22 @@ export default function ChartTabs({
           All
         </button>
       </nav>
-      <form onSubmit={findDate} className="mb-4 flex flex-wrap items-center gap-2">
-        <label htmlFor={`${type}-find-date`} className="text-sm text-muted">Find a date</label>
-        <input id={`${type}-find-date`} name="date" type="date" required max={today} className="num rounded border border-line bg-surface px-3 py-2 text-sm" />
-        <button type="submit" className="rounded border border-line px-4 py-2 text-sm font-semibold hover:bg-bg2">Find result</button>
-        {findMessage && <p role="status" className="w-full text-sm text-muted">{findMessage}</p>}
+      <form onSubmit={findDate} className="mb-5 grid w-full max-w-md grid-cols-[minmax(0,1fr)_auto] items-center gap-2">
+        <label htmlFor={`${type}-find-date`} className="col-span-2 text-[13px] font-medium text-muted">Find a date</label>
+        <div className="relative flex h-11 min-w-0 items-center justify-between gap-2 rounded-lg border border-line bg-bg px-3 focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/25">
+          <span aria-hidden="true" className={`truncate text-[14px] ${selectedDate ? 'num text-fg' : 'text-muted'}`}>
+            {selectedDate ? selectedDate.split('-').reverse().join('/') : 'Choose date'}
+          </span>
+          <svg aria-hidden="true" className="pointer-events-none h-[18px] w-[18px] shrink-0 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M16 3v4M8 3v4M3 11h18" /></svg>
+          <input id={`${type}-find-date`} name="date" type="date" required max={today} value={selectedDate}
+            onChange={(event) => { setSelectedDate(event.target.value); setFindMessage(''); }}
+            onClick={(event) => { try { event.currentTarget.showPicker?.(); } catch { /* Native picker remains available. */ } }}
+            onInvalid={() => setFindMessage('Choose a date to find its result.')}
+            aria-describedby={findMessage ? `${type}-date-message` : undefined}
+            className="absolute inset-0 h-full w-full min-w-0 cursor-pointer text-base opacity-0" />
+        </div>
+        <button type="submit" className="h-11 shrink-0 rounded-lg border border-accent bg-accent px-3 text-[14px] font-semibold text-accent-ink transition-colors hover:bg-accent/85 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent sm:px-4">Find result</button>
+        {findMessage && <p id={`${type}-date-message`} role="status" className="col-span-2 text-[13px] text-muted">{findMessage}</p>}
       </form>
 
       {/* ── Single-year view ── */}
