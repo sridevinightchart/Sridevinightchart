@@ -19,6 +19,7 @@ export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 
 export const metadata: Metadata = {
+  other: { 'google-adsense-account': 'ca-pub-5366170232839580' },
   title: "Sridevi Night Chart: Today's Result, Jodi & Panel Chart",
   description:
     "Check the Sridevi Night matka chart for today's result, with the jodi chart and panel chart from 2019 to tonight.",
