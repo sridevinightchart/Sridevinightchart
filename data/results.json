@@ -22602,13 +22602,13 @@
   {
     "date": "2026-11-14",
     "openPana": "289",
-    "closePana": null,
-    "jodi": null,
-    "status": "open",
-    "updatedAt": "2026-11-14T14:26:02.120Z",
+    "closePana": "266",
+    "jodi": "94",
+    "status": "closed",
+    "updatedAt": "2026-11-14T15:16:58.016Z",
     "provenance": {
       "dateBasis": "owner-approved-publication-window",
-      "observedAt": "2026-11-14T14:26:02.120Z",
+      "observedAt": "2026-11-14T15:16:58.016Z",
       "sources": [
         "https://matka-tips.org/record-chart/sridevi-night-jodi",
         "https://khabar.bet/sridevi-night-matka-chart"
