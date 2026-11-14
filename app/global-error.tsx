@@ -1,6 +1,6 @@
 ﻿'use client';
 
-export default function GlobalError({ reset }: { error: Error & { digest?: string }; reset: () => void }) {
+export default function GlobalError(_props: { error: Error & { digest?: string }; reset: () => void }) {
   return <html lang="en-IN">
     <head>
       <title>Page temporarily unavailable | Sridevi Night Chart</title>
@@ -12,7 +12,7 @@ export default function GlobalError({ reset }: { error: Error & { digest?: strin
         <section data-nosnippet>
         <h1>This page is temporarily unavailable</h1>
         <p style={{ lineHeight: 1.75 }}>Please reload to try again.</p>
-        <button type="button" onClick={reset} style={{ marginTop: 20, border: 0, borderRadius: 8, background: '#F4A51C', color: '#141938', padding: '12px 24px', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>Try again</button>
+        <button type="button" onClick={() => window.location.reload()} style={{ marginTop: 20, border: 0, borderRadius: 8, background: '#F4A51C', color: '#141938', padding: '12px 24px', fontSize: 16, fontWeight: 700, cursor: 'pointer' }}>Try again</button>
         </section>
       </main>
     </body>
