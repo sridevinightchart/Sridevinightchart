@@ -12,7 +12,12 @@ const observations = unstable_cache(async (market: Market, _date: string) => {
 export async function currentMarketState(market: Market, saved: Result[]) {
   try {
     const now = new Date();
-    const sources = await observations(market, todayIST(now));
+    let sources = await observations(market, todayIST(now));
+    // Failed background revalidation can retain an old cache entry indefinitely.
+    // Never report that stale observation as a successful current source check.
+    if (sources.some((s) => now.getTime() - Date.parse(s.observedAt) > 60_000)) {
+      sources = await observeMarket(market);
+    }
     return { records: reconcileMarket(market, sources, saved, new Date()), sourceStatus: 'checked' as const, checkedAt: sources.map((s) => s.observedAt).sort()[0] };
   } catch (error) {
     console.error(`${market} live check failed; saved records retained:`, error instanceof Error ? error.message : 'Unknown error');

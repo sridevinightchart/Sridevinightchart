@@ -6,6 +6,9 @@ const fresh = { open: '238', jodi: '33', close: '490' };
 const now = new Date('2026-11-13T14:45:00Z'); // 20:15 IST.
 
 describe('exact live hero extraction', () => {
+  it('normalizes a trailing empty close delimiter without inventing a close', () => {
+    expect(parseLiveHero('<div class="live">SRIDEVI NIGHT 279-8-</div>', 'https://matka-tips.org/record-chart/sridevi-night-jodi')).toEqual({open:'279',jodi:'8*',close:'***'});
+  });
   it('extracts Matka Tips live result and ignores a conflicting advertisement', () => {
     const html = '<div class="live"><h3>Matka Tips Live Results</h3><div class="t24"><div>SRIDEVI NIGHT</div><span>⏳ 238-33-490</span></div></div><section><h2>SRIDEVI NIGHT</h2>340-70-280</section>';
     expect(parseLiveHero(html, 'https://matka-tips.org/record-chart/sridevi-night-jodi')).toEqual(fresh);

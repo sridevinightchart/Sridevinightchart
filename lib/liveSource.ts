@@ -28,7 +28,7 @@ export function parseLiveHero(html: string, source: string): HeroResult | null {
   if (end < 0) return null;
   const hero = rest.slice(0, end);
   const plain = hero.replace(/<[^>]*>/g, ' ').replace(/&nbsp;|&#\d+;/g, ' ').replace(/\s+/g, ' ');
-  const matches = [...plain.matchAll(/\bSRIDEVI\s+NIGHT\s*(?:⏳\s*)?(\d{3})\s*[-–]\s*(\d{1,2}|\d\*)(?:\s*[-–]\s*(\d{3}|\*{3}))?(?=\s|$)/gi)];
+  const matches = [...plain.matchAll(/\bSRIDEVI\s+NIGHT\s*(?:⏳\s*)?(\d{3})\s*[-–]\s*(\d{1,2}|\d\*)(?:\s*[-–]\s*(\d{3}|\*{3})?)?(?=\s|$)/gi)];
   if (matches.length !== 1) return null;
   const [, open, middle, suppliedClose] = matches[0];
   // Some live blocks show only "470-1" during open publication.

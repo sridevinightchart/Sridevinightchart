@@ -37,7 +37,7 @@ export function parseDayHero(html: string, source: string): HeroResult | null {
   if (end < 0) return null;
   const hero = rest.slice(0, end);
   const plain = hero.replace(/<[^>]*>/g, ' ').replace(/&nbsp;|&#\d+;/g, ' ').replace(/\s+/g, ' ');
-  const matches = [...plain.matchAll(/\bSRIDEVI(?:\s+DAY)?\s*(?:⏳\s*)?(\d{3})\s*[-–]\s*(\d{1,2}|\d\*)(?:\s*[-–]\s*(\d{3}|\*{3}))?(?=\s|$)/gi)];
+  const matches = [...plain.matchAll(/\bSRIDEVI(?:\s+DAY)?\s*(?:⏳\s*)?(\d{3})\s*[-–]\s*(\d{1,2}|\d\*)(?:\s*[-–]\s*(\d{3}|\*{3})?)?(?=\s|$)/gi)];
   if (matches.length !== 1) return null;
   const [, open, middle, suppliedClose] = matches[0];
   if (!suppliedClose && !/^\d\*?$/.test(middle)) return null;
@@ -124,12 +124,18 @@ export function reconcileMarket(market: Market, observations: SourceObservation[
   return mergePublished(existing, incoming, date);
 }
 
-async function sourceText(url: string): Promise<string> {
-  const response = await fetch(url, { headers: { 'User-Agent': 'SrideviNightChart/1.0', 'Cache-Control': 'no-cache' }, cache: 'no-store', signal: AbortSignal.timeout(7000) });
-  if (!response.ok) throw new Error(`${new URL(url).hostname}: HTTP ${response.status}`);
-  const body = await response.text();
-  if (body.length > 2_000_000) throw new Error('Unexpected source response size.');
-  return body;
+async function sourceText(url: string, attempts = 2): Promise<string> {
+  let failure: unknown;
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      const response = await fetch(url, { headers: { 'User-Agent': 'SrideviNightChart/1.0', 'Cache-Control': 'no-cache' }, cache: 'no-store', signal: AbortSignal.timeout(6000) });
+      if (!response.ok) throw new Error(`${new URL(url).hostname}: HTTP ${response.status}`);
+      const body = await response.text();
+      if (body.length > 2_000_000) throw new Error('Unexpected source response size.');
+      return body;
+    } catch (error) { failure = error; }
+  }
+  throw failure;
 }
 
 export async function observeMarket(market: Market, now = new Date()): Promise<SourceObservation[]> {
@@ -144,7 +150,7 @@ export async function observeMarket(market: Market, now = new Date()): Promise<S
       if (!/SRIDEVI\s+NIGHT/i.test(stripUnsafeHtml(body)) || !/id:\s*['"]731['"]/.test(body)) throw new Error('Night source identity changed.');
       const year = todayIST(now).slice(0, 4);
       try {
-        const fragment = await sourceText(`https://khabar.bet/ajax/mumbai-panel-chart.php?id=731&freq=daily&years=${year}&accmin=2022&accmax=${year}`);
+        const fragment = await sourceText(`https://khabar.bet/ajax/mumbai-panel-chart.php?id=731&freq=daily&years=${year}&accmin=2022&accmax=${year}`, 1);
         dated = [...dated, ...parseDatedPanels(fragment, now.toISOString())];
       } catch (error) {
         if (!hero) throw error;

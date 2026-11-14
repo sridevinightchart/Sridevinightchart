@@ -23,6 +23,15 @@ describe('Day live hero boundaries', () => {
   it('normalizes open-only results without inventing a close', () => {
     expect(parseDayHero('<div class="live">SRIDEVI 238-3</div>', MARKETS.day.sources[0])).toEqual({open:'238',jodi:'3*',close:'***'});
   });
+  it('accepts the actual trailing-dash publication used by Matka Tips', () => {
+    expect(parseDayHero('<div class="live"><div>SRIDEVI</div><span>⏳ 279-8-</span><button>⏳ Refresh</button></div>', MARKETS.day.sources[0])).toEqual({open:'279',jodi:'8*',close:'***'});
+    const sources = observations('day');
+    sources[0].hero = parseDayHero('<div class="live">SRIDEVI 279-8-</div>', MARKETS.day.sources[0]);
+    sources[1].hero = parseDayHero('<div id="chart-top-result"><div>SRIDEVI</div><div>279-8</div></div>', MARKETS.day.sources[1]);
+    expect(reconcileMarket('day', sources, [prior], dayNow).at(-1)).toMatchObject({date:'2026-11-14',openPana:'279',jodi:null,closePana:null,status:'open'});
+    expect(parseDayHero('<div class="live">SRIDEVI 279-82-</div>', MARKETS.day.sources[0])).toBeNull();
+    expect(parseDayHero('<div class="live">SRIDEVI 279-8-1234</div>', MARKETS.day.sources[0])).toBeNull();
+  });
 });
 describe('dated weekly panel parsing', () => {
   it('preserves empty weekday cells and accepts one-digit dates and th panels', () => {
