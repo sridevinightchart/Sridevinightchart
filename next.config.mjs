@@ -3,11 +3,11 @@ const isDev = process.env.NODE_ENV !== 'production';
 
 const csp = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ''}`,
+  `script-src 'self' 'unsafe-inline' https://*.clarity.ms${isDev ? " 'unsafe-eval'" : ''}`,
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
+  "img-src 'self' data: https://*.clarity.ms https://c.bing.com",
   "font-src 'self'",
-  "connect-src 'self'",
+  "connect-src 'self' https://*.clarity.ms https://c.bing.com",
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",

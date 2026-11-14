@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import JsonLd from '@/components/JsonLd';
-import { INFO_PAGES, EDITORIAL_MODIFIED, infoMetadata, type InfoSlug } from '@/lib/pages';
+import { INFO_PAGES, infoModified, infoMetadata, type InfoSlug } from '@/lib/pages';
 import { legalContent } from '@/lib/legalContent';
 import { SITE, abs } from '@/lib/site';
 
@@ -36,7 +36,7 @@ export default function InfoPage({ params }: { params: { info: string } }) {
       <nav aria-label="Related information" className="mt-8 flex flex-wrap gap-x-5 gap-y-3 text-sm">
         {Object.entries(INFO_PAGES).filter(([key]) => key !== slug).map(([key, item]) => <Link key={key} href={`/${key}/`} className="text-accent-text hover:underline">{item.title}</Link>)}
       </nav>
-      <JsonLd data={{ '@context': 'https://schema.org', '@type': page.type, '@id': abs(`/${slug}/#webpage`), url: abs(`/${slug}/`), name: page.title, description: page.description, inLanguage: 'en-IN', dateModified: EDITORIAL_MODIFIED, isPartOf: { '@id': abs('/#website') } }} />
+      <JsonLd data={{ '@context': 'https://schema.org', '@type': page.type, '@id': abs(`/${slug}/#webpage`), url: abs(`/${slug}/`), name: page.title, description: page.description, inLanguage: 'en-IN', dateModified: infoModified(slug), isPartOf: { '@id': abs('/#website') } }} />
     </article>
   );
 }

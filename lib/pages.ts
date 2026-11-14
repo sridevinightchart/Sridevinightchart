@@ -23,3 +23,7 @@ export function infoMetadata(slug: InfoSlug): Metadata {
     twitter: { card: 'summary_large_image', title, description: page.description, images: [abs('/opengraph-image.png')] },
   };
 }
+
+export function infoModified(slug: string): string {
+  return slug === 'privacy-policy' ? "2026-11-14T08:02:07.658Z" : EDITORIAL_MODIFIED;
+}
