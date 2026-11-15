@@ -1,15 +1,18 @@
 import { unstable_cache } from 'next/cache';
-import { observeMarket, reconcileMarket, type Market } from './marketSources';
+import { compactObservations, observeMarket, reconcileMarket, savedResultSufficient, type Market } from './marketSources';
 import type { Result } from './matka';
 import { todayIST } from './time';
 
 // Shared server-side cache, not a database or a write to Vercel's filesystem.
 // Including the IST date prevents yesterday's undated hero crossing midnight.
 const observations = unstable_cache(async (market: Market, _date: string) => {
-  return observeMarket(market);
-}, ['verified-market-sources-v1'], { revalidate: 30 });
+  return compactObservations(await observeMarket(market));
+}, ['compact-market-sources-v2'], { revalidate: 30 });
 
 export async function currentMarketState(market: Market, saved: Result[]) {
+  if (savedResultSufficient(market, saved)) {
+    return { records: saved, sourceStatus: 'saved' as const, checkedAt: null };
+  }
   try {
     const now = new Date();
     let sources = await observations(market, todayIST(now));

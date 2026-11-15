@@ -1,3 +1,4 @@
+import { LIVE_CACHE_HEADERS } from '@/lib/resultPolicy';
 import { NextResponse } from 'next/server';
 import { currentMarketState } from '@/lib/currentResults';
 import * as repo from '@/lib/repo';
@@ -8,7 +9,7 @@ export const runtime = 'nodejs';
 
 export async function GET() {
   const state = await currentMarketState('night', repo.getAll());
-  return NextResponse.json({ ...buildLive(new Date(), state.records), sourceStatus: state.sourceStatus, sourceCheckedAt: state.checkedAt }, { headers: { 'Cache-Control': 'no-store' } });
+  return NextResponse.json({ ...buildLive(new Date(), state.records), sourceStatus: state.sourceStatus, sourceCheckedAt: state.checkedAt }, { headers: LIVE_CACHE_HEADERS });
 }
 
 export const maxDuration = 30;

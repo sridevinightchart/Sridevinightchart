@@ -25,5 +25,5 @@ export function infoMetadata(slug: InfoSlug): Metadata {
 }
 
 export function infoModified(slug: string): string {
-  return slug === 'privacy-policy' ? "2026-11-14T08:02:07.658Z" : EDITORIAL_MODIFIED;
+  return slug === 'privacy-policy' ? "2026-11-15T18:26:02.988Z" : EDITORIAL_MODIFIED;
 }

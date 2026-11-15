@@ -1,3 +1,5 @@
+import ChartDataProvider from '@/components/ChartDataProvider';
+import { chartDelivery } from '@/lib/chartAssets';
 ﻿import Link from 'next/link';
 import Image from 'next/image';
 import chartComparison from '../sridevi-panel-chart-vs-jodi-chart.webp';
@@ -35,7 +37,8 @@ export default async function SrideviDayPage() {
   const blocks = dayBlocks(today, records);
   const url = abs('/sridevi-chart/');
   const pageUpdated = [DAY_MODIFIED, ...dayResults().map((r) => r.updatedAt)].sort().at(-1)!;
-  return <>
+  const chartPlan = chartDelivery('day', blocks, today);
+  return <ChartDataProvider initialBlocks={chartPlan.initialBlocks} archives={chartPlan.archives}>
     <JsonLd data={{ '@context': 'https://schema.org', '@graph': [
       { '@type': 'WebPage', '@id': `${url}#webpage`, url, name: DAY_TITLE, description: DAY_DESCRIPTION, inLanguage: 'en-IN', isPartOf: { '@id': abs('/#website') }, dateModified: pageUpdated, mainEntity: { '@id': `${url}#article` } },
       { '@type': 'Article', '@id': `${url}#article`, headline: 'Sridevi Chart', description: DAY_DESCRIPTION, inLanguage: 'en-IN', mainEntityOfPage: { '@id': `${url}#webpage` }, image: abs('/sridevi-day-opengraph.png'), dateModified: pageUpdated, about: { '@type': 'Thing', name: 'Sridevi Day results, panel chart and jodi chart' }, hasPart: ['Sridevi Day Result Today', 'Sridevi Panel Chart', 'Sridevi Jodi Chart', 'History of Sridevi Day Chart', 'Sridevi Chart FAQs'].map((name) => ({ '@type': 'WebPageElement', name })) },
@@ -57,7 +60,7 @@ export default async function SrideviDayPage() {
         <p>The Sridevi panel chart shows the full result for every day: the open patti on the left, the jodi in the middle and the close patti on the right. Patti, pana and panel all mean the same three digits, so this is also the Sridevi chart with patti.</p>
         <p>Each row is one week, Monday to Sunday, with its dates on the left. Tap a year to open that year’s Sridevi day panel chart.</p>
       </div>
-      <ChartTabs type="panel" blocks={blocks} today={today} market="Sridevi Day" distinguishMissing />
+      <ChartTabs type="panel" today={today} market="Sridevi Day" distinguishMissing />
       <p className="mt-4 text-[14px] leading-7 text-muted">A red jodi has two same digits, like 99. Stars mean no result came that day. A dash (—) means the historical entry is awaiting verification.</p>
     </Section>
     <Section id="jodi-chart" title="Sridevi Jodi Chart" wide>
@@ -65,7 +68,7 @@ export default async function SrideviDayPage() {
         <p>In the Sridevi jodi chart, each day has one box with just two digits: that day’s jodi. The first digit comes from the open patti and the second from the close patti.</p>
         <p>With the pattis left out, many more weeks fit on one screen. Use this chart to look across weeks fast, and the panel chart when you need the pattis too.</p>
       </div>
-      <ChartTabs type="jodi" blocks={blocks} today={today} market="Sridevi Day" distinguishMissing />
+      <ChartTabs type="jodi" today={today} market="Sridevi Day" distinguishMissing />
       <Image src={chartComparison} alt="Sridevi panel chart and Sridevi jodi chart" sizes="(max-width: 880px) calc(100vw - 48px), 832px" className="mx-auto mt-8 h-auto w-full max-w-[832px] rounded-lg" />
     </Section>
     <Section id="history" title="History of Sridevi Day Chart">
@@ -79,5 +82,5 @@ export default async function SrideviDayPage() {
     <Section id="faq" title="Sridevi Chart FAQs">
       <div className="mt-5 mb-16"><Faq items={faq} pagePath="/sridevi-chart/" /></div>
     </Section>
-  </>;
+  </ChartDataProvider>;
 }

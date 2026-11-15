@@ -1,3 +1,5 @@
+import ChartDataProvider from '@/components/ChartDataProvider';
+import { chartDelivery } from '@/lib/chartAssets';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -129,8 +131,9 @@ export default async function HomePage() {
     },
   ];
 
+  const chartPlan = chartDelivery('night', allBlocks, today);
   return (
-    <>
+    <ChartDataProvider initialBlocks={chartPlan.initialBlocks} archives={chartPlan.archives}>
       <JsonLd data={{
         '@context': 'https://schema.org',
         '@graph': [
@@ -193,7 +196,7 @@ export default async function HomePage() {
         </Prose>
         <div className="mt-5">
           {allBlocks.length > 0 ? (
-            <ChartTabs type="jodi" blocks={allBlocks} today={today} />
+            <ChartTabs type="jodi" today={today} />
           ) : (
             <p className="card p-5 text-muted text-sm">
               No results yet — add data via the admin panel or CSV import.
@@ -211,7 +214,7 @@ export default async function HomePage() {
         </Prose>
         <div className="mt-5">
           {allBlocks.length > 0 ? (
-            <ChartTabs type="panel" blocks={allBlocks} today={today} />
+            <ChartTabs type="panel" today={today} />
           ) : (
             <p className="card p-5 text-muted text-sm">
               No results yet — add data via the admin panel or CSV import.
@@ -425,6 +428,6 @@ export default async function HomePage() {
           <Faq items={faqItems} />
         </div>
       </Sec>
-    </>
+    </ChartDataProvider>
   );
 }

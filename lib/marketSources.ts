@@ -1,5 +1,5 @@
 import type { Result } from './matka';
-import { ank } from './matka';
+import { ank, isValidPana, jodiFrom } from './matka';
 import { sourceRecord, mergePublished } from './resultFeed';
 import { parseLiveHero, type HeroResult } from './liveSource';
 import { addDays, minutesIST, todayIST } from './time';
@@ -76,6 +76,21 @@ export function parseDatedPanels(html: string, now: string): Result[] {
 }
 
 export interface SourceObservation { source: string; hero: HeroResult | null; dated: Result[]; observedAt: string; }
+
+/** Trim before writing the paid cache, rather than after reading all of history. */
+export function compactObservations(sources: SourceObservation[], now = new Date()): SourceObservation[] {
+  const date = todayIST(now), from = addDays(date, -2);
+  return sources.map((source) => ({ ...source, dated: source.dated.filter((r) => r.date >= from && r.date <= date).map(({ date, openPana, jodi, closePana, status, updatedAt }) => ({ date, openPana, jodi, closePana, status, updatedAt })) }));
+}
+
+export function savedResultSufficient(market: Market, rows: Result[], now = new Date()): boolean {
+  const date = todayIST(now);
+  const complete = (r: Result | undefined) => !!r && (r.status === 'holiday' || (r.status === 'closed' && !!r.openPana && !!r.closePana && isValidPana(r.openPana) && isValidPana(r.closePana) && r.jodi === jodiFrom(r.openPana, r.closePana)));
+  const current = rows.find((r) => r.date === date);
+  if (complete(current)) return true;
+  if (current?.status === 'open') return false;
+  return minutesIST(now) < MARKETS[market].start && complete(rows.find((r) => r.date === addDays(date, -1)));
+}
 const same = (a: Result, b: Result) => a.openPana === b.openPana && a.closePana === b.closePana && a.jodi === b.jodi && a.status === b.status;
 
 /** One source anchors a calendar date; the other must corroborate its numbers. */
@@ -139,7 +154,7 @@ async function sourceText(url: string, attempts = 2): Promise<string> {
 }
 
 export async function observeMarket(market: Market, now = new Date()): Promise<SourceObservation[]> {
-  return Promise.all(MARKETS[market].sources.map(async (source) => {
+  const observations = await Promise.all(MARKETS[market].sources.map(async (source) => {
     const body = await sourceText(source);
     const title = body.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? '';
     if (!/sridevi/i.test(title) || (market === 'day' && /night|morning/i.test(title))) throw new Error('Source market identity could not be verified.');
@@ -160,4 +175,5 @@ export async function observeMarket(market: Market, now = new Date()): Promise<S
     if (!hero && !dated.length) throw new Error(`${new URL(source).hostname}: neither a live result nor dated panels could be read.`);
     return { source, hero, dated, observedAt: now.toISOString() };
   }));
+  return compactObservations(observations, now);
 }

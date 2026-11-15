@@ -18,3 +18,6 @@ data/*
 !data/sridevi-night.csv
 
 !data/sridevi-day.json
+
+# Generated, content-addressed chart archives
+public/chart-data/

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import type { LivePayload } from '@/lib/live';
 import { display, isDoubleJodi } from '@/lib/matka';
+import { pollDelay } from '@/lib/resultPolicy';
 import { SITE } from '@/lib/site';
 import { labelShort, minutesIST, todayIST, WEEKDAYS } from '@/lib/time';
 
@@ -39,15 +40,21 @@ export default function ResultCard({
   const [error, setError] = useState('');
   const router = useRouter();
   const snapshot = useRef(`${initial.date}:${initial.version ?? ''}`);
-  const lastPoll = useRef(0);
+  const lastPoll = useRef(Date.now());
+  const dataRef = useRef(initial);
+  const inFlight = useRef(false);
 
   const refresh = useCallback(async () => {
+    if (inFlight.current) return;
+    inFlight.current = true;
+    lastPoll.current = Date.now();
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(endpoint, { cache: 'no-store' });
+      const res = await fetch(endpoint);
       if (!res.ok) throw new Error(String(res.status));
       const next = await res.json() as LivePayload;
+      dataRef.current = next;
       setData(next);
       const version = `${next.date}:${next.version ?? ''}`;
       if (snapshot.current !== version) {
@@ -57,24 +64,22 @@ export default function ResultCard({
     } catch {
       setError('Could not refresh. Check your connection and try again.');
     } finally {
+      inFlight.current = false;
       setLoading(false);
       setNowMin(minutesIST());
-      lastPoll.current = Date.now();
     }
   }, [router, endpoint]);
 
   useEffect(() => {
     if (todayIST() !== initial.date) refresh();
     setNowMin(minutesIST());
-    const inWindow = () => {
-      const m = minutesIST();
-      return m >= pollStartMinute && m <= pollEndMinute;
-    };
     const tick = () => {
-      setNowMin(minutesIST());
-      if (document.visibilityState === 'visible' && (inWindow() || Date.now() - lastPoll.current >= 120_000)) refresh();
+      const minute = minutesIST();
+      setNowMin(minute);
+      const delay = pollDelay(dataRef.current, todayIST(), minute, pollStartMinute, pollEndMinute);
+      if (document.visibilityState === 'visible' && Date.now() - lastPoll.current >= delay) refresh();
     };
-    const id = window.setInterval(tick, 30_000);
+    const id = window.setInterval(tick, 15_000);
     const onVisible = () => {
       if (document.visibilityState === 'visible') refresh();
     };

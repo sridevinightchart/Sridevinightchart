@@ -2,59 +2,104 @@
 
 import { useEffect, useState } from 'react';
 import { JodiChart, PanelChart } from './Charts';
-import type { Week } from '@/lib/matka';
+import { weekYear } from '@/lib/matka';
+import { mondayOf } from '@/lib/time';
+import type { ChartAsset, ChartBlock } from '@/lib/chartTypes';
+import { loadChartAsset } from '@/lib/loadChartAsset';
+import { useChartData } from './ChartDataProvider';
 
-interface Block { year: number; weeks: Week[] }
+type Block = ChartBlock;
 
 export default function ChartTabs({
   type,
-  blocks,
+  blocks: providedBlocks,
+  assets: providedAssets,
   today,
   archiveYears = [],
   market = 'Sridevi Night',
   distinguishMissing = false,
 }: {
   type: 'jodi' | 'panel';
-  blocks: Block[];  // sorted newest-year-first
+  blocks?: Block[];  // sorted newest-year-first
+  assets?: ChartAsset[];
   today: string;
   archiveYears?: number[];
   market?: string;
   distinguishMissing?: boolean;
 }) {
+  const context = useChartData();
+  const blocks = providedBlocks ?? context?.blocks ?? [];
+  const assets = providedAssets ?? context?.archives ?? [];
   const Chart = type === 'jodi' ? JodiChart : PanelChart;
-  const years = blocks.map((b) => b.year);
+  const years = [...new Set([...blocks.map((b) => b.year), ...assets.map((b) => b.year)])].sort((a, b) => b - a);
   const [active, setActive] = useState<number | 'all'>(years[0] ?? 'all');
   const [findMessage, setFindMessage] = useState('');
   const [selectedDate, setSelectedDate] = useState('');
+  const [loaded, setLoaded] = useState<Record<string, Block>>({});
+  const [loadingArchive, setLoadingArchive] = useState(false);
+  const [archiveError, setArchiveError] = useState('');
+  const [retry, setRetry] = useState(0);
+  const availableBlocks = years.flatMap((year) => {
+    const block = blocks.find((b) => b.year === year) ?? loaded[assets.find((a) => a.year === year)?.url ?? ''];
+    return block ? [block] : [];
+  });
 
-  function findDate(event: React.FormEvent<HTMLFormElement>) {
+  async function ensureYear(year: number): Promise<Block | undefined> {
+    const initial = blocks.find((b) => b.year === year);
+    if (initial) return initial;
+    const asset = assets.find((a) => a.year === year);
+    if (!asset) return undefined;
+    const block = loaded[asset.url] ?? await loadChartAsset(asset);
+    setLoaded((previous) => ({ ...previous, [asset.url]: block }));
+    return block;
+  }
+
+  useEffect(() => {
+    const required = assets.filter((asset) => (active === 'all' || active === asset.year) && !loaded[asset.url]);
+    if (!required.length) { setLoadingArchive(false); return; }
+    let cancelled = false;
+    setLoadingArchive(true);
+    setArchiveError('');
+    Promise.all(required.map(async (asset) => ({ asset, block: await loadChartAsset(asset) })))
+      .then((results) => {
+        if (!cancelled) setLoaded((previous) => ({ ...previous, ...Object.fromEntries(results.map(({ asset, block }) => [asset.url, block])) }));
+      })
+      .catch(() => { if (!cancelled) setArchiveError('Could not load the earlier results. Please try again.'); })
+      .finally(() => { if (!cancelled) setLoadingArchive(false); });
+    return () => { cancelled = true; };
+  }, [active, assets, blocks, retry]);
+
+  async function findDate(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const date = String(new FormData(event.currentTarget).get('date') ?? '');
-    const year = Number(date.slice(0, 4));
+    const year = weekYear(mondayOf(date));
     if (!years.includes(year) && archiveYears.includes(year)) {
       const archive = document.getElementById(`history-${year}`) as HTMLDetailsElement | null;
       if (archive) archive.open = true;
       const cell = document.getElementById(`h-${date}`);
       if (cell) { cell.scrollIntoView({ behavior: 'smooth', block: 'center' }); cell.classList.remove('is-flash'); void cell.offsetWidth; cell.classList.add('is-flash'); setFindMessage(''); return; }
     }
-    if (!blocks.some((block) => block.weeks.some((week) => week.days.some((day) => day.date === date)))) {
+    let block: Block | undefined;
+    try { block = await ensureYear(year); }
+    catch { setFindMessage('Could not load that year. Please try again.'); return; }
+    if (!block?.weeks.some((week) => week.days.some((day) => day.date === date))) {
       setFindMessage('No chart record is available for that date.');
       return;
     }
     setFindMessage('');
     setActive(years.includes(year) ? year : 'all');
-    requestAnimationFrame(() => {
+    requestAnimationFrame(() => requestAnimationFrame(() => {
       const cell = document.getElementById(`${type === 'jodi' ? 'j' : 'p'}-${date}`);
       cell?.scrollIntoView({ behavior: 'smooth', block: 'center' });
       cell?.classList.remove('is-flash');
       if (cell) { void cell.offsetWidth; cell.classList.add('is-flash'); }
-    });
+    }));
   }
 
   useEffect(() => {
     const selectHash = (hash: string) => {
       const match = hash.match(new RegExp(`^#${type}-year-(\\d{4})$`));
-      if (match && blocks.some((b) => b.year === Number(match[1]))) setActive(Number(match[1]));
+      if (match && years.includes(Number(match[1]))) setActive(Number(match[1]));
     };
     const openArchive = (hash: string) => {
       const match = hash.match(/^#history-(\d{4})$/);
@@ -74,7 +119,7 @@ export default function ChartTabs({
       window.removeEventListener('hashchange', onHash);
       document.removeEventListener('click', onClick);
     };
-  }, [blocks, type]);
+  }, [blocks, assets, type]);
 
   function tabCls(on: boolean) {
     return [
@@ -85,7 +130,7 @@ export default function ChartTabs({
     ].join(' ');
   }
 
-  const activeBlock = active !== 'all' ? blocks.find((b) => b.year === active) : null;
+  const activeBlock = active !== 'all' ? availableBlocks.find((b) => b.year === active) : null;
 
   return (
     <div>
@@ -137,6 +182,8 @@ export default function ChartTabs({
         {findMessage && <p id={`${type}-date-message`} role="status" className="col-span-2 text-[13px] text-muted">{findMessage}</p>}
       </form>
 
+      {loadingArchive && <p role="status" className="mb-4 text-sm text-muted">Loading earlier results...</p>}
+      {archiveError && <p role="alert" className="mb-4 text-sm text-muted">{archiveError} <button type="button" className="font-semibold text-accent-text underline" onClick={() => setRetry((value) => value + 1)}>Retry</button></p>}
       {/* ── Single-year view ── */}
       {active !== 'all' && activeBlock && (
         <Chart
@@ -150,7 +197,7 @@ export default function ChartTabs({
       {/* ── All-years view: stacked seamlessly, no headings ── */}
       {active === 'all' && (
         <div className="chart-seamless">
-          {blocks.map((block, i) => (
+          {availableBlocks.map((block, i) => (
             <div
               key={block.year}
               /* lazy-load every year except the first (already in viewport) */

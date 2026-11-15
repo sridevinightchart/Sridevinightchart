@@ -1,20 +1,16 @@
 import fs from 'node:fs';
 
-const snapshots = [
-  { file: 'data/results.json', endpoint: '/api/result/today/' },
-  { file: 'data/sridevi-day.json', endpoint: '/api/sridevi-day/result/today/' },
-].map(({ file, endpoint }) => ({ endpoint, expected: JSON.parse(fs.readFileSync(file, 'utf8')).reduce((latest, row) => row.updatedAt > latest ? row.updatedAt : latest, '') }));
+const expected = Object.fromEntries([
+  ['night', 'data/results.json'], ['day', 'data/sridevi-day.json'],
+].map(([market, file]) => [market, JSON.parse(fs.readFileSync(file, 'utf8')).reduce((latest, row) => row.updatedAt > latest ? row.updatedAt : latest, '')]));
 const base = process.env.PUBLIC_SITE_URL || 'https://sridevinightchart.com';
 async function published() {
-  const checks = await Promise.all(snapshots.map(async ({ endpoint, expected }) => {
-    try {
-      const response = await fetch(base.replace(/\/$/, '') + endpoint + '?verify=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(20_000) });
-      if (!response.ok) return false;
-      const data = await response.json();
-      return (data.snapshotVersion ?? data.version) === expected;
-    } catch { return false; }
-  }));
-  return checks.every(Boolean);
+  try {
+    const response = await fetch(base.replace(/\/$/, '') + '/api/result/snapshot/?verify=' + Date.now(), { cache: 'no-store', signal: AbortSignal.timeout(10_000) });
+    if (!response.ok) return false;
+    const data = await response.json();
+    return data.night === expected.night && data.day === expected.day;
+  } catch { return false; }
 }
 if (await published()) {
   console.log('Live site already serves the expected Day and Night snapshots.');

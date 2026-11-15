@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
+    "dev": "tsx scripts/generate-chart-data.ts && next dev",
+    "build": "tsx scripts/generate-chart-data.ts && next build",
     "start": "next start",
     "import": "tsx scripts/import.ts",
     "test": "vitest run",
