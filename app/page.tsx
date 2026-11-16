@@ -7,7 +7,7 @@ import resultExplanation from './sridevi-night-result-open-panna-jodi-close-pann
 import chartReading from './sridevi-night-jodi-chart-how-to-read.webp';
 import { currentResults } from '@/lib/currentResults';
 import ResultCard from '@/components/ResultCard';
-import { EDITORIAL_MODIFIED } from '@/lib/pages';
+import { HOME_MODIFIED, HOME_PUBLISHED } from '@/lib/pages';
 import ChartTabs from '@/components/ChartTabs';
 import Faq from '@/components/Faq';
 import { nightFaqItems } from '@/lib/nightFaq';
@@ -104,7 +104,7 @@ export default async function HomePage() {
     .reverse()
     .map((year) => ({ year, weeks: weeksForYear(year, today, records) }))
     .filter((b) => b.weeks.length > 0);
-  const pageUpdated = [repo.lastUpdated() ?? '', EDITORIAL_MODIFIED].sort().at(-1)!;
+  const pageUpdated = [repo.lastUpdated() ?? '', HOME_MODIFIED].sort().at(-1)!;
   const totalResults = years.reduce((sum, y) => sum + y.results, 0);
   const firstDateFormatted = first
     ? parseDay(first).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
@@ -125,6 +125,7 @@ export default async function HomePage() {
             isPartOf: { '@id': `${SITE.url}/#website` },
             about: { '@type': 'Thing', name: 'Sridevi Night results and historical charts' },
             dateModified: pageUpdated,
+            datePublished: HOME_PUBLISHED,
             mainEntity: { '@id': `${SITE.url}/#article` },
             hasPart: { '@id': `${SITE.url}/#faq` },
           },
@@ -134,6 +135,7 @@ export default async function HomePage() {
             mainEntityOfPage: { '@id': `${SITE.url}/#webpage` },
             image: `${SITE.url}/opengraph-image.png`,
             dateModified: pageUpdated,
+            datePublished: HOME_PUBLISHED,
             articleSection: ['Sridevi Night Result Today', 'Sridevi Night Jodi Chart', 'Sridevi Night Panel Chart', 'What is sridevi night chart?', 'Sridevi, Sridevi Morning and Sridevi Night', 'How to Read the Sridevi Night Matka Chart', 'Sridevi Night Old Chart and Record', 'How We Collect and Check Every Result', 'Sridevi Night Chart FAQs'],
           },
         ],
@@ -213,7 +215,7 @@ export default async function HomePage() {
             panna, the jodi, and the close panna.
           </p>
           <p>
-            There are two Sridevi markets, <Link href="/sridevi-chart/">day</Link> and night, and their results are never the same. This
+            There are two Sridevi markets, day and night, and their results are never the same. This
             chart covers only the night market, so a day result never ends up in it.
           </p>
           <p>
@@ -240,7 +242,7 @@ export default async function HomePage() {
                 <th scope="row" className="px-3 py-3 font-medium">Sridevi (Day)</th>
                 <td className="whitespace-nowrap px-3 py-3">{MARKET_TIMINGS.day.openTime}</td>
                 <td className="whitespace-nowrap px-3 py-3">{MARKET_TIMINGS.day.closeTime}</td>
-                <td className="px-3 py-3"><Link href="/sridevi-chart/" className="text-accent-text underline underline-offset-4">Sridevi chart</Link></td>
+                <td className="px-3 py-3">Sridevi chart</td>
               </tr>
               <tr>
                 <th scope="row" className="px-3 py-3 font-medium">Sridevi Night</th>

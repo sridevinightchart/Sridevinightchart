@@ -3,6 +3,9 @@ import { SITE, abs } from './site';
 
 // Preserve these editorial dates; change modified only when the copy changes.
 export const EDITORIAL_MODIFIED = '2026-11-12T16:43:00Z';
+// Homepage edition republished at the owner's request; result dates are separate.
+export const HOME_PUBLISHED = '2026-11-16T07:24:23Z';
+export const HOME_MODIFIED = HOME_PUBLISHED;
 export const INFO_PAGES = {
   about: { title: 'About Us', description: 'About Sridevi Night Chart, our historical records, data checks and independence.', type: 'AboutPage' },
   contact: { title: 'Contact Us', description: 'Contact Sridevi Night Chart to report a result error, ask a site question or raise a privacy concern.', type: 'ContactPage' },
