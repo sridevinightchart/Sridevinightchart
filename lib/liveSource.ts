@@ -2,9 +2,10 @@ import { sourceRecord } from './resultFeed';
 import type { Result } from './matka';
 import { ank } from './matka';
 import { minutesIST, todayIST } from './time';
+import { MARKET_TIMINGS } from './marketTiming';
 
 // Keep checking until the end of the IST day so delayed jobs/late closes can catch up.
-export const LIVE_WINDOW = { start: 19 * 60 + 15, end: 23 * 60 + 59 };
+export const LIVE_WINDOW = { start: MARKET_TIMINGS.night.openMinute, end: MARKET_TIMINGS.night.pollEndMinute };
 export interface HeroResult { open: string; jodi: string; close: string; date?: string; }
 
 /** Read only the actual live hero, excluding adverts, chart history and scripts. */

@@ -7,6 +7,9 @@ import Footer from '@/components/Footer';
 import JsonLd from '@/components/JsonLd';
 import { SITE } from '@/lib/site';
 import * as repo from '@/lib/repo';
+import NightFaqHead from '@/components/NightFaqHead';
+import { nightFaqItems } from '@/lib/nightFaq';
+import { faqSchema } from '@/lib/faq';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -36,6 +39,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   const lastUpdated = repo.lastUpdated();
   return (
     <html lang="en-IN" className={`${inter.variable} ${mono.variable} ${display.variable}`} data-theme="light">
+      <head><NightFaqHead data={faqSchema(nightFaqItems(repo.firstDate()))} /></head>
       <body className="min-h-screen font-sans antialiased">
         <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-M34V85S6" height="0" width="0" style={{ display: 'none', visibility: 'hidden' }} title="Google Tag Manager" /></noscript>
         <Script id="google-tag-manager" strategy="afterInteractive">{`
@@ -45,7 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
           })(window,document,'script','dataLayer','GTM-M34V85S6');
         `}</Script>
-        <Script id="microsoft-clarity" strategy="afterInteractive">{`
+        <Script id="microsoft-clarity" strategy="lazyOnload">{`
           (function(c,l,a,r,i,t,y){
             c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
             t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;

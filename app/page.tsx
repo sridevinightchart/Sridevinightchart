@@ -9,7 +9,9 @@ import { currentResults } from '@/lib/currentResults';
 import ResultCard from '@/components/ResultCard';
 import { EDITORIAL_MODIFIED } from '@/lib/pages';
 import ChartTabs from '@/components/ChartTabs';
-import Faq, { type QA } from '@/components/Faq';
+import Faq from '@/components/Faq';
+import { nightFaqItems } from '@/lib/nightFaq';
+import { MARKET_TIMINGS } from '@/lib/marketTiming';
 import JsonLd from '@/components/JsonLd';
 import { buildLive } from '@/lib/live';
 import { weeksForYear } from '@/lib/chartData';
@@ -108,28 +110,7 @@ export default async function HomePage() {
     ? parseDay(first).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
     : '';
 
-  const faqItems: QA[] = [
-    {
-      q: 'When does the Sridevi Night result come out?',
-      a: `The open comes at ${SITE.openTime} IST and the close at ${SITE.closeTime} IST. This page adds each one within minutes and refreshes by itself while you wait.`,
-    },
-    {
-      q: 'Does Sridevi Night run on Sundays and holidays?',
-      a: 'Yes, it runs all seven days, Sunday included. It closes on Republic Day (26 January), Holi and Independence Day (15 August), and those nights show stars in the chart.',
-    },
-    {
-      q: 'How do I find the result for an old date?',
-      a: 'Tap the year in the year bar, find the row with that week\'s dates, then move across to the day. You can also type the date into the date search above the charts.',
-    },
-    {
-      q: "Is tonight's result added to the chart straight away?",
-      a: "Today's result is the card at the top of the page, which changes during the evening as the open and close come out. The chart is the full record of every night before it. Once tonight's close is declared, it's added to the chart too.",
-    },
-    {
-      q: "Can old results predict tonight's result?",
-      a: "No. Every Sridevi Night result is separate from the ones before it. We keep the record and nothing more: no tips, no guesses, no \"fix\" numbers.",
-    },
-  ];
+  const faqItems = nightFaqItems(first);
 
   const chartPlan = chartDelivery('night', allBlocks, today);
   return (
@@ -153,7 +134,7 @@ export default async function HomePage() {
             mainEntityOfPage: { '@id': `${SITE.url}/#webpage` },
             image: `${SITE.url}/opengraph-image.png`,
             dateModified: pageUpdated,
-            articleSection: ['Sridevi Night Result Today', 'Sridevi Night Jodi Chart', 'Sridevi Night Panel Chart', 'What is sridevi night chart?', 'How to Read the Sridevi Night Matka Chart', 'Sridevi Night Old Chart and Record', 'How We Collect and Check Every Result', 'Sridevi Night Chart FAQs'],
+            articleSection: ['Sridevi Night Result Today', 'Sridevi Night Jodi Chart', 'Sridevi Night Panel Chart', 'What is sridevi night chart?', 'Sridevi, Sridevi Morning and Sridevi Night', 'How to Read the Sridevi Night Matka Chart', 'Sridevi Night Old Chart and Record', 'How We Collect and Check Every Result', 'Sridevi Night Chart FAQs'],
           },
         ],
       }} />
@@ -244,6 +225,35 @@ export default async function HomePage() {
       </Sec>
 
       {/* ══ H2: How to Read ══════════════════════════ */}
+      <Sec id="sridevi-markets" title="Sridevi, Sridevi Morning and Sridevi Night">
+        <Prose>
+          <p>There is more than one Sridevi market, and they are easy to mix up. Each one is drawn at its own time and keeps its own chart. A result from one never appears on another&apos;s chart.</p>
+        </Prose>
+        <div className="mt-5 overflow-x-auto rounded-card border border-line">
+          <table className="w-full text-left text-[14px]">
+            <caption className="sr-only">Sridevi Day and Sridevi Night timings in IST</caption>
+            <thead className="border-b border-line bg-surface">
+              <tr>{['Market', 'Open', 'Close', 'Chart'].map((heading) => <th key={heading} scope="col" className="px-3 py-3 font-semibold">{heading}</th>)}</tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-line">
+                <th scope="row" className="px-3 py-3 font-medium">Sridevi (Day)</th>
+                <td className="whitespace-nowrap px-3 py-3">{MARKET_TIMINGS.day.openTime}</td>
+                <td className="whitespace-nowrap px-3 py-3">{MARKET_TIMINGS.day.closeTime}</td>
+                <td className="px-3 py-3"><Link href="/sridevi-chart/" className="text-accent-text underline underline-offset-4">Sridevi chart</Link></td>
+              </tr>
+              <tr>
+                <th scope="row" className="px-3 py-3 font-medium">Sridevi Night</th>
+                <td className="whitespace-nowrap px-3 py-3">{MARKET_TIMINGS.night.openTime}</td>
+                <td className="whitespace-nowrap px-3 py-3">{MARKET_TIMINGS.night.closeTime}</td>
+                <td className="px-3 py-3">This page</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <Prose><p>This page is the Sridevi Night chart. If you are looking for the day result, open the <Link href="/sridevi-chart/">Sridevi chart</Link>.</p></Prose>
+      </Sec>
+
       <Sec id="how-to-read" title="How to Read the Sridevi Night Matka Chart">
         <Prose>
           <p>
@@ -425,7 +435,7 @@ export default async function HomePage() {
       {/* ══ H2: FAQ ══════════════════════════════════ */}
       <Sec id="faq" title="Sridevi Night Chart FAQs">
         <div className="mt-5">
-          <Faq items={faqItems} />
+          <Faq items={faqItems} schema={false} />
         </div>
       </Sec>
     </ChartDataProvider>

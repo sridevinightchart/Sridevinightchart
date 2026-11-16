@@ -5,37 +5,28 @@ import { useRouter } from 'next/navigation';
 import type { LivePayload } from '@/lib/live';
 import { display, isDoubleJodi } from '@/lib/matka';
 import { pollDelay } from '@/lib/resultPolicy';
-import { SITE } from '@/lib/site';
-import { labelShort, minutesIST, todayIST, WEEKDAYS } from '@/lib/time';
-
-function statusOf(data: LivePayload, nowMin: number, openMinute: number): string {
-  const s = data.today?.status;
-  if (s === 'closed') return 'Result declared';
-  if (s === 'open') return 'Open declared — waiting for close';
-  if (s === 'holiday') return 'No result today';
-  if (nowMin < openMinute) return 'Awaiting open result';
-  return 'Waiting for result…';
-}
+import { MARKET_TIMINGS } from '@/lib/marketTiming';
+import { resultStatus } from '@/lib/resultStatus';
+import { labelShort, minutesIST, timeLabelIST, todayIST, WEEKDAYS } from '@/lib/time';
 
 export default function ResultCard({
   initial,
   initialMinutes,
   title = 'Sridevi Night result today',
   endpoint = '/api/result/today/',
-  openMinute = SITE.openMinute,
-  pollStartMinute = SITE.pollStartMinute,
-  pollEndMinute = SITE.pollEndMinute,
+  market = 'night',
 }: {
   initial: LivePayload;
   initialMinutes: number;
   title?: string;
   endpoint?: string;
-  openMinute?: number;
-  pollStartMinute?: number;
-  pollEndMinute?: number;
+  market?: keyof typeof MARKET_TIMINGS;
 }) {
+  const timing = MARKET_TIMINGS[market];
+  const { pollStartMinute, pollEndMinute } = timing;
   const [data, setData] = useState(initial);
   const [nowMin, setNowMin] = useState(initialMinutes);
+  const [nowDate, setNowDate] = useState(initial.date);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
@@ -67,15 +58,18 @@ export default function ResultCard({
       inFlight.current = false;
       setLoading(false);
       setNowMin(minutesIST());
+      setNowDate(todayIST());
     }
   }, [router, endpoint]);
 
   useEffect(() => {
     if (todayIST() !== initial.date) refresh();
     setNowMin(minutesIST());
+    setNowDate(todayIST());
     const tick = () => {
       const minute = minutesIST();
       setNowMin(minute);
+      setNowDate(todayIST());
       const delay = pollDelay(dataRef.current, todayIST(), minute, pollStartMinute, pollEndMinute);
       if (document.visibilityState === 'visible' && Date.now() - lastPoll.current >= delay) refresh();
     };
@@ -95,7 +89,8 @@ export default function ResultCard({
   const previous = !!shown && shown.date !== data.date;
   const d = display(shown);
   const y = display(data.yesterday);
-  const status = statusOf(data, nowMin, openMinute);
+  const status = resultStatus(data, nowDate, nowMin, timing);
+  const savedAt = shown?.updatedAt && Number.isFinite(Date.parse(shown.updatedAt)) ? shown.updatedAt : null;
 
   return (
     <figure className="flex flex-col gap-3.5" aria-live="polite">
@@ -170,10 +165,14 @@ export default function ResultCard({
 
       {/* Week strip */}
       <figcaption>
+        <p className="mb-1 min-h-[2.5rem] text-[13px] leading-5" style={{ color: 'rgb(var(--accent-text))' }}>
+          {status}
+        </p>
         <p className="mb-2 text-[13px]" style={{ color: 'rgb(var(--muted))' }}>
           Yesterday: <span className="num font-semibold" style={{ color: 'rgb(var(--text))' }}>{y.text}</span>
-          {' · '}
-          <span style={{ color: 'rgb(var(--accent-text))' }}>{status}</span>
+        </p>
+        <p className="mb-2 min-h-5 text-[12px] leading-5 text-muted">
+          {savedAt && <time dateTime={savedAt}>Updated {timeLabelIST(savedAt)}</time>}
         </p>
         <ol className="grid grid-cols-7 gap-1.5" aria-label="This week's jodi results">
           {data.week.map((w, i) => {

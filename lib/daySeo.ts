@@ -1,7 +1,8 @@
 ﻿import type { Metadata } from 'next';
 import { abs, SITE } from './site';
+import { MARKET_TIMINGS } from './marketTiming';
 export const DAY_TITLE = 'Sridevi Chart: Sridevi Day Panel Chart and Jodi Chart';
-export const DAY_DESCRIPTION = "Sridevi chart with today's result, the full Sridevi day panel chart with patti, and the jodi chart from 2018 to today. Open 11:35 AM, close 12:35 PM IST.";
+export const DAY_DESCRIPTION = `Sridevi chart with today's result, the full Sridevi day panel chart with patti, and the jodi chart from 2018 to today. Open ${MARKET_TIMINGS.day.openTime}, close ${MARKET_TIMINGS.day.closeTime} IST.`;
 export const dayMetadata: Metadata = {
   title: DAY_TITLE, description: DAY_DESCRIPTION,
   alternates: { canonical: abs('/sridevi-chart/') },

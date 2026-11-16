@@ -22,8 +22,12 @@ describe.each([JodiChart, PanelChart])('chart cell rules', (Chart) => {
     expect(html).toContain('no result (holiday)');
     expect(html).toMatch(/data-date="2026-11-12"[^>]*><\/span>/);
     if (Chart === PanelChart) {
-      expect(html).toContain('<span>2</span><span>3</span><span>8</span>');
-      expect(html).toContain('<span>4</span><span>9</span><span>0</span>');
+      expect(html).toContain('aria-hidden="true">238</span>');
+      expect(html).toContain('aria-hidden="true">490</span>');
     }
+    // Table cells support accessible names; generic spans do not. This also
+    // exposes all three panel values together instead of isolated digits.
+    expect(html).toContain('<td class="day" aria-label="Monday 9 November 2026: 238-33-490">');
+    expect(html).not.toMatch(/<span[^>]*aria-label=/);
   });
 });

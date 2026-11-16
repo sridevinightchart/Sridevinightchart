@@ -13,13 +13,14 @@ import { buildDayLive, dayBlocks, dayResults, DAY_MODIFIED } from '@/lib/day';
 import { dayMetadata, DAY_TITLE, DAY_DESCRIPTION } from '@/lib/daySeo';
 import { abs } from '@/lib/site';
 import { minutesIST, todayIST } from '@/lib/time';
+import { MARKET_TIMINGS } from '@/lib/marketTiming';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 30;
 export const metadata = dayMetadata;
 const faq: QA[] = [
   { q: 'Is the Sridevi chart the same as the Sridevi Day chart?', a: 'Yes. Sridevi and Sridevi Day are two names for the same day market. Sridevi Night is a different market, and it has its own chart.' },
-  { q: 'What time does the Sridevi open and close come?', a: "The open comes at 11:35 AM IST and the close at 12:35 PM IST. You'll see both here shortly after they're declared." },
+  { q: 'What time does the Sridevi open and close come?', a: `The open comes at ${MARKET_TIMINGS.day.openTime} IST and the close at ${MARKET_TIMINGS.day.closeTime} IST. You'll see both here shortly after they're declared.` },
   { q: 'Are patti, pana and panel three different things?', a: "None. All three words mean the three-digit number. A day's result has two: one from the open and one from the close." },
   { q: 'Is there a Sridevi result on Sundays?', a: 'Yes. A result comes every day of the week, and Sunday is no exception. The market takes just three days off in a year: Republic Day (26 January), Holi and Independence Day (15 August). Look for stars on those dates.' },
   { q: 'Is there a Sridevi old chart from 1996 or 2000?', a: 'We looked and couldn’t find one we could trust. The oldest Sridevi result we can prove is from 5 March 2018, so that’s where our chart begins. Anything older would be a guess, and we don’t put guesses in the record.' },
@@ -51,7 +52,7 @@ export default async function SrideviDayPage() {
         </div>
         <section id="result-today" aria-labelledby="result-today-h">
           <h2 id="result-today-h" className="disp text-[32px] font-extrabold leading-tight mb-4">Sridevi Day Result Today</h2>
-          <ResultCard initial={buildDayLive(new Date(), records)} initialMinutes={minutesIST()} title="Sridevi Day result today" endpoint="/api/sridevi-day/result/today/" openMinute={695} pollStartMinute={685} pollEndMinute={900} />
+          <ResultCard initial={buildDayLive(new Date(), records)} initialMinutes={minutesIST()} title="Sridevi Day result today" endpoint="/api/sridevi-day/result/today/" market="day" />
         </section>
       </div>
     </div>

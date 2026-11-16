@@ -1,12 +1,8 @@
 import JsonLd from './JsonLd';
-import { SITE } from '@/lib/site';
+import { faqSchema, type QA } from '@/lib/faq';
+export type { QA } from '@/lib/faq';
 
-export interface QA {
-  q: string;
-  a: string;
-}
-
-export default function Faq({ items, id = 'faq', pagePath = '/' }: { items: QA[]; id?: string; pagePath?: string }) {
+export default function Faq({ items, id = 'faq', pagePath = '/', schema = true }: { items: QA[]; id?: string; pagePath?: string; schema?: boolean }) {
   return (
     <>
       <div className="divide-y divide-line overflow-hidden rounded-card border border-line bg-surface">
@@ -22,16 +18,7 @@ export default function Faq({ items, id = 'faq', pagePath = '/' }: { items: QA[]
           </details>
         ))}
       </div>
-      <JsonLd
-        data={{
-          '@context': 'https://schema.org',
-          '@type': 'FAQPage',
-          '@id': `${SITE.url}${pagePath}#faq`,
-          isPartOf: { '@id': `${SITE.url}${pagePath}#webpage` },
-          inLanguage: 'en-IN',
-          mainEntity: items.map((it) => ({ '@type': 'Question', name: it.q, acceptedAnswer: { '@type': 'Answer', text: it.a } })),
-        }}
-      />
+      {schema && <JsonLd data={faqSchema(items, pagePath)} />}
     </>
   );
 }

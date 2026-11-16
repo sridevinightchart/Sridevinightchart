@@ -1,4 +1,5 @@
 import type { DayCell, Week } from '@/lib/matka';
+import type { CSSProperties } from 'react';
 import { display, isDoubleJodi } from '@/lib/matka';
 import { labelDayMonth, labelLong, mondayOf, WEEKDAYS, weekLabel } from '@/lib/time';
 
@@ -59,7 +60,7 @@ interface ChartProps {
 export function JodiChart({ weeks, today, caption, distinguishMissing = false }: ChartProps) {
   const currentMonday = mondayOf(today);
   return (
-    <div className="chart-scroll">
+    <div className="chart-scroll" style={{ '--chart-rows': weeks.length } as CSSProperties}>
       <table className="chart">
         <Head caption={caption} />
         <tbody>
@@ -77,8 +78,8 @@ export function JodiChart({ weeks, today, caption, distinguishMissing = false }:
                   c.date === today ? 'is-today' : '',
                 ].join(' ');
                 return (
-                  <td key={c.date} className="day">
-                    <span id={`j-${c.date}`} data-date={c.date} className={cls} aria-label={cellLabel(c)} title={cellLabel(c)}>
+                  <td key={c.date} className="day" aria-label={cellLabel(c)}>
+                    <span id={`j-${c.date}`} data-date={c.date} className={cls} title={cellLabel(c)}>
                       {c.kind === 'future' ? '' : distinguishMissing && c.kind === 'missing' ? '�' : d.jodi}
                     </span>
                   </td>
@@ -95,9 +96,7 @@ export function JodiChart({ weeks, today, caption, distinguishMissing = false }:
 function Digits({ value }: { value: string }) {
   return (
     <span className="pana num" aria-hidden="true">
-      {[...value].map((ch, i) => (
-        <span key={i}>{ch}</span>
-      ))}
+      {value}
     </span>
   );
 }
@@ -105,7 +104,7 @@ function Digits({ value }: { value: string }) {
 export function PanelChart({ weeks, today, caption, distinguishMissing = false }: ChartProps) {
   const currentMonday = mondayOf(today);
   return (
-    <div className="chart-scroll panel-chart">
+    <div className="chart-scroll panel-chart" style={{ '--chart-rows': weeks.length } as CSSProperties}>
       <table className="chart">
         <Head caption={caption} />
         <tbody>
@@ -123,8 +122,8 @@ export function PanelChart({ weeks, today, caption, distinguishMissing = false }
                 ].join(' ');
                 const jodiCls = `pj num ${c.kind === 'result' && isDoubleJodi(d.jodi) ? 'is-double' : ''}`;
                 return (
-                  <td key={c.date} className="day">
-                    <span id={`p-${c.date}`} data-date={c.date} className={cls} aria-label={cellLabel(c)} title={cellLabel(c)}>
+                  <td key={c.date} className="day" aria-label={cellLabel(c)}>
+                    <span id={`p-${c.date}`} data-date={c.date} className={cls} title={cellLabel(c)}>
                       {c.kind === 'future' ? null : distinguishMissing && c.kind === 'missing' ? <span className={jodiCls}>�</span> : (
                         <>
                           <Digits value={d.open} />

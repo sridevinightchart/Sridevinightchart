@@ -3,14 +3,15 @@ import { ank, isValidPana, jodiFrom } from './matka';
 import { sourceRecord, mergePublished } from './resultFeed';
 import { parseLiveHero, type HeroResult } from './liveSource';
 import { addDays, minutesIST, todayIST } from './time';
+import { MARKET_TIMINGS } from './marketTiming';
 
 export type Market = 'night' | 'day';
 export const MARKETS = {
-  night: { name: 'Sridevi Night', start: 1155, end: 1439, sources: [
+  night: { name: 'Sridevi Night', start: MARKET_TIMINGS.night.openMinute, end: MARKET_TIMINGS.night.pollEndMinute, sources: [
     'https://matka-tips.org/record-chart/sridevi-night-jodi',
     'https://khabar.bet/sridevi-night-matka-chart',
   ] },
-  day: { name: 'Sridevi Day', start: 695, end: 900, sources: [
+  day: { name: 'Sridevi Day', start: MARKET_TIMINGS.day.openMinute, end: MARKET_TIMINGS.day.pollEndMinute, sources: [
     'https://matka-tips.org/record-chart/sridevi-jodi',
     'https://sattamatkajodi.com/record/sridevi-satta-penal-chart.php',
   ] },

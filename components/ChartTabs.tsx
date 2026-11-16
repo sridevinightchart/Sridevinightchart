@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { JodiChart, PanelChart } from './Charts';
 import { weekYear } from '@/lib/matka';
 import { mondayOf } from '@/lib/time';
@@ -9,6 +9,10 @@ import { loadChartAsset } from '@/lib/loadChartAsset';
 import { useChartData } from './ChartDataProvider';
 
 type Block = ChartBlock;
+// Editing the date or displaying a load message should not rebuild a whole
+// year's table. New live weeks still render when router.refresh replaces them.
+const MemoJodiChart = memo(JodiChart);
+const MemoPanelChart = memo(PanelChart);
 
 export default function ChartTabs({
   type,
@@ -30,7 +34,7 @@ export default function ChartTabs({
   const context = useChartData();
   const blocks = providedBlocks ?? context?.blocks ?? [];
   const assets = providedAssets ?? context?.archives ?? [];
-  const Chart = type === 'jodi' ? JodiChart : PanelChart;
+  const Chart = type === 'jodi' ? MemoJodiChart : MemoPanelChart;
   const years = [...new Set([...blocks.map((b) => b.year), ...assets.map((b) => b.year)])].sort((a, b) => b - a);
   const [active, setActive] = useState<number | 'all'>(years[0] ?? 'all');
   const [findMessage, setFindMessage] = useState('');

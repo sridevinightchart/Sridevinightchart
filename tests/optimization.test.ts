@@ -76,6 +76,20 @@ describe('static archive delivery', () => {
     expect(plan.initialBlocks.map(b=>b.year)).toEqual([2027,2026]);
     expect(plan.archives.map(b=>b.year)).toEqual([2025]);
   });
+  it('trims only browser metadata, preserving live cell kinds and verified source records', () => {
+    const input = structuredClone(block);
+    const cell = input.weeks[0].days.find(day => day.result)!;
+    cell.result!.provenance = { dateBasis: 'dated-source-agreement', observedAt: closed.updatedAt, sources: [...MARKETS.day.sources] };
+    const original = structuredClone(input);
+    const plan = chartDelivery('day', [input], '2026-11-14');
+    const displayed = plan.initialBlocks[0].weeks[0].days.find(day => day.result)!;
+    const { provenance, ...values } = cell.result!;
+    expect(displayed.result).toEqual({ ...values, updatedAt: '' });
+    expect(displayed.result).not.toHaveProperty('provenance');
+    expect(plan.initialBlocks[0].weeks[0].days.map(day => day.kind)).toEqual(input.weeks[0].days.map(day => day.kind));
+    expect(input).toEqual(original);
+    expect(displayed.result).not.toBe(cell.result);
+  });
   it('keeps archived filenames stable when pending/future cells become missing', () => {
     const past=JSON.parse(JSON.stringify(block));
     past.weeks[0].days[6].kind='missing';
