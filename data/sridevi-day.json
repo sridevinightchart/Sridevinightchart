@@ -25210,13 +25210,13 @@
   {
     "date": "2026-11-18",
     "openPana": "479",
-    "closePana": null,
-    "jodi": null,
-    "status": "open",
-    "updatedAt": "2026-11-18T07:15:18.040Z",
+    "jodi": "07",
+    "closePana": "566",
+    "status": "closed",
+    "updatedAt": "2026-11-18T08:12:58.693Z",
     "provenance": {
-      "dateBasis": "owner-approved-publication-window",
-      "observedAt": "2026-11-18T07:15:18.040Z",
+      "dateBasis": "dated-source-agreement",
+      "observedAt": "2026-11-18T08:12:59.663Z",
       "sources": [
         "https://matka-tips.org/record-chart/sridevi-jodi",
         "https://sattamatkajodi.com/record/sridevi-satta-penal-chart.php"
