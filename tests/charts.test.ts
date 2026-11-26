@@ -30,4 +30,11 @@ describe.each([JodiChart, PanelChart])('chart cell rules', (Chart) => {
     expect(html).toContain('<td class="day" aria-label="Monday 9 November 2026: 238-33-490">');
     expect(html).not.toMatch(/<span[^>]*aria-label=/);
   });
+  it('distinguishes a missing entry with a readable dash, leaving future dates blank', () => {
+    const weeks = groupByWeek([], '2026-11-11', '2026-11-09', '2026-11-15');
+    const html = renderToStaticMarkup(createElement(Chart, { weeks, today: '2026-11-11', caption: 'Test', distinguishMissing: true }));
+    expect(html).toContain('—');
+    expect(html).not.toContain('\uFFFD');
+    expect(html).toMatch(/data-date="2026-11-12"[^>]*><\/span>/);
+  });
 });

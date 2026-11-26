@@ -134,7 +134,7 @@ export default function ResultCard({
 
             {/* Jodi — the centrepiece */}
             <span
-              className={`disp num font-black leading-none tracking-tight ${isDoubleJodi(d.jodi) ? 'is-double' : ''}`}
+              className={`result-jodi disp num font-black leading-none tracking-tight ${isDoubleJodi(d.jodi) ? 'is-double' : ''}`}
               style={{ fontSize: 'clamp(100px, 16vw, 210px)', lineHeight: 0.82 }}
               aria-label={`Jodi: ${d.jodi}`}
             >

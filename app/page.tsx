@@ -132,6 +132,8 @@ export default async function HomePage() {
           {
             '@type': 'Article', '@id': `${SITE.url}/#article`,
             headline: 'Sridevi Night Chart', inLanguage: 'en-IN',
+            description: metadata.description,
+            publisher: { '@id': `${SITE.url}/#publisher` },
             mainEntityOfPage: { '@id': `${SITE.url}/#webpage` },
             image: `${SITE.url}/opengraph-image.png`,
             dateModified: pageUpdated,
@@ -215,7 +217,7 @@ export default async function HomePage() {
             panna, the jodi, and the close panna.
           </p>
           <p>
-            There are two Sridevi markets, day and night, and their results are never the same. This
+            There are separate Sridevi markets, including day and night, and each keeps its own results. This
             chart covers only the night market, so a day result never ends up in it.
           </p>
           <p>

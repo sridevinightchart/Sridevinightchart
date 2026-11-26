@@ -203,6 +203,7 @@ body {
 .panel-chart { contain-intrinsic-block-size: auto calc(46.2px + var(--chart-rows, 47) * 77px); }
 
 .is-double { color: rgb(var(--highlight)); }
+.result-jodi.is-double { color: rgb(154 26 18); }
 .is-blank { color: rgb(var(--text) / 0.3); font-weight: 400; }
 .is-future { color: transparent; }
 

@@ -18,9 +18,7 @@ export const metadata: Metadata = {
   verification: { google: 'svVZs7B1m7nEMMqTTXStFC1Rjuk8xv3O6OnAafzvFrA' },
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml', sizes: 'any' },
       { url: '/icon-192.png', type: 'image/png', sizes: '192x192' },
-      { url: '/icon-512.png', type: 'image/png', sizes: '512x512' },
     ],
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
@@ -66,7 +64,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           data={{
             '@context': 'https://schema.org',
             '@graph': [
-              { '@type': 'WebSite', '@id': `${SITE.url}/#website`, name: SITE.name, url: `${SITE.url}/`, inLanguage: 'en-IN' },
+              { '@type': 'Organization', '@id': `${SITE.url}/#publisher`, name: SITE.name, url: `${SITE.url}/`,
+                logo: { '@type': 'ImageObject', url: `${SITE.url}/icon-512.png`, width: 512, height: 512 } },
+              { '@type': 'WebSite', '@id': `${SITE.url}/#website`, name: SITE.name, url: `${SITE.url}/`, inLanguage: 'en-IN',
+                publisher: { '@id': `${SITE.url}/#publisher` } },
             ],
           }}
         />

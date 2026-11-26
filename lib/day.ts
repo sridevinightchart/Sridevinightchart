@@ -5,7 +5,9 @@ import { buildLive, type LivePayload } from './live';
 
 // Isolated Day market snapshot. Never fall back to Night records.
 export const DAY_FIRST_DATE = '2018-03-05';
-export const DAY_MODIFIED = '2026-11-13T20:00:00Z';
+// Page edition dates are separate from the dated result records.
+export const DAY_PUBLISHED = '2026-11-26T02:59:26Z';
+export const DAY_MODIFIED = DAY_PUBLISHED;
 export function dayResults(): Result[] { return snapshot.map((row) => ({ ...row } as Result)); }
 export function dayBlocks(today = todayIST(), records: Result[] = dayResults()) {
   const rows = records.filter((r) => r.date <= today);

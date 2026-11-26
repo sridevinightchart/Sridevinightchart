@@ -16,7 +16,7 @@ export default function Footer({ years, lastUpdated }: { years: number[]; lastUp
           <div className="flex flex-col gap-2.5">
             <span className="disp text-[44px] font-black leading-none">{SITE.name}</span>
             <p className="mt-1 text-[15px] leading-relaxed max-w-[32ch]">
-              Results and records only. Updated every night, minutes after the close.
+              Published results and historical records. Updates appear after source checks.
             </p>
             <Link
               href="/"

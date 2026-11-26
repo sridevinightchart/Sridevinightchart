@@ -80,7 +80,7 @@ export function JodiChart({ weeks, today, caption, distinguishMissing = false }:
                 return (
                   <td key={c.date} className="day" aria-label={cellLabel(c)}>
                     <span id={`j-${c.date}`} data-date={c.date} className={cls} title={cellLabel(c)}>
-                      {c.kind === 'future' ? '' : distinguishMissing && c.kind === 'missing' ? '�' : d.jodi}
+                      {c.kind === 'future' ? '' : distinguishMissing && c.kind === 'missing' ? '—' : d.jodi}
                     </span>
                   </td>
                 );
@@ -124,7 +124,7 @@ export function PanelChart({ weeks, today, caption, distinguishMissing = false }
                 return (
                   <td key={c.date} className="day" aria-label={cellLabel(c)}>
                     <span id={`p-${c.date}`} data-date={c.date} className={cls} title={cellLabel(c)}>
-                      {c.kind === 'future' ? null : distinguishMissing && c.kind === 'missing' ? <span className={jodiCls}>�</span> : (
+                      {c.kind === 'future' ? null : distinguishMissing && c.kind === 'missing' ? <span className={jodiCls}>—</span> : (
                         <>
                           <Digits value={d.open} />
                           <span className={jodiCls} aria-hidden="true">{d.jodi}</span>
